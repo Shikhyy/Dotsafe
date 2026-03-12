@@ -1,8 +1,29 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useDotSafeStore } from '@/store';
 import { Shield, AlertTriangle, AlertCircle, CheckCircle2 } from 'lucide-react';
+
+function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+  const [display, setDisplay] = useState(0);
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / 800, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * value));
+      if (progress < 1) frameRef.current = requestAnimationFrame(animate);
+    };
+    frameRef.current = requestAnimationFrame(animate);
+    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
+  }, [value]);
+
+  return <span className={className}>{display}</span>;
+}
 
 export function RiskMeter() {
   const { scanResult } = useDotSafeStore();
@@ -37,7 +58,7 @@ export function RiskMeter() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className={`font-mono text-2xl font-bold ${riskColor}`}>{score}</span>
+            <span className={`font-mono text-2xl font-bold ${riskColor}`}><AnimatedNumber value={score} /></span>
             <span className="text-[9px] text-text-muted">{riskLabel}</span>
           </div>
         </div>

@@ -125,7 +125,7 @@ AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant A
 |-------|-----------|
 | **Smart Contracts** | Solidity 0.8.24 · Hardhat · OpenZeppelin 5.x |
 | **Frontend** | Next.js 16 · React 19 · TypeScript · Tailwind CSS 4 |
-| **Web3** | Wagmi 3 · Viem 2 · WalletConnect |
+| **Web3** | ThirdWeb SDK v5 |
 | **AI Engine** | Google Gemini 2.0 Flash |
 | **State** | Zustand 5 |
 | **Animations** | Framer Motion |
@@ -215,7 +215,7 @@ npm install
 # Create environment file
 cat > .env.local << EOF
 GEMINI_API_KEY=your_gemini_api_key_here
-NEXT_PUBLIC_WC_PROJECT_ID=your_walletconnect_project_id  # optional
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your_thirdweb_client_id
 EOF
 
 # Start development server
@@ -233,7 +233,7 @@ Open **http://localhost:3000** and connect your wallet.
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `GEMINI_API_KEY` | ✅ | Google Gemini API key for AI risk scoring |
-| `NEXT_PUBLIC_WC_PROJECT_ID` | ❌ | WalletConnect project ID (optional) |
+| `NEXT_PUBLIC_THIRDWEB_CLIENT_ID` | ✅ | ThirdWeb client ID for wallet connection |
 | `DEPLOYER_PRIVATE_KEY` | ✅* | Deployer wallet private key (*for contract deployment only) |
 | `POLKADOT_HUB_RPC` | ❌ | Custom RPC endpoint for Polkadot Hub |
 | `WESTEND_RPC` | ❌ | Custom RPC endpoint for Westend testnet |
@@ -271,6 +271,14 @@ Test coverage includes:
 ---
 
 ## 🤖 AI Risk Scoring Engine
+
+### API Routes
+
+| Route | Method | Description |
+|-------|--------|-------------|
+| `/api/score-contract` | POST | AI risk scoring via Gemini — returns risk level, score, and reasoning |
+| `/api/resolve-spender` | GET | Resolve spender contract address to protocol name |
+| `/api/token-metadata` | GET | Fetch token symbol, name, and decimals from on-chain |
 
 DotSafe uses **Google Gemini 2.0 Flash** to analyze each approved contract against multiple risk vectors:
 

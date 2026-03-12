@@ -49,10 +49,19 @@ export type AppState =
   | 'SUCCESS'
   | 'ERROR';
 
+export interface ParachainApproval {
+  tokenSymbol: string;
+  spenderAddress: string;
+  isUnlimited: boolean;
+  riskLevel: RiskLevel;
+  riskScore: number;
+}
+
 export interface ParachainStatus {
   paraId: number;
   name: string;
   approvalCount: number;
   riskLevel: RiskLevel;
   isScanning: boolean;
+  approvals?: ParachainApproval[];
 }

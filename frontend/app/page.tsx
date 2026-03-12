@@ -1,18 +1,56 @@
 'use client';
 
-import { useAccount } from 'wagmi';
+import { useActiveAccount } from 'thirdweb/react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { WalletConnect } from '@/components/wallet/WalletConnect';
 import { Shield, Scan, Zap, Globe } from 'lucide-react';
 
+function AnimatedCounter({ end, suffix = '', prefix = '', duration = 1600 }: {
+  end: number; suffix?: string; prefix?: string; duration?: number;
+}) {
+  const [display, setDisplay] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const frameRef = useRef<number>(0);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStarted(true); },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!started) return;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * end));
+      if (progress < 1) frameRef.current = requestAnimationFrame(animate);
+    };
+    frameRef.current = requestAnimationFrame(animate);
+    return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
+  }, [started, end, duration]);
+
+  return (
+    <div ref={ref} className="font-mono text-2xl font-bold text-accent">
+      {prefix}{display.toLocaleString()}{suffix}
+    </div>
+  );
+}
+
 export default function LandingPage() {
-  const { isConnected } = useAccount();
+  const account = useActiveAccount();
   const router = useRouter();
 
   useEffect(() => {
-    if (isConnected) router.push('/dashboard');
-  }, [isConnected, router]);
+    if (account) router.push('/dashboard');
+  }, [account, router]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative scanline">
@@ -58,18 +96,20 @@ export default function LandingPage() {
           ))}
         </div>
 
-        {/* Stats counter */}
+        {/* Animated stats counter */}
         <div className="grid grid-cols-3 gap-8 mt-16">
-          {[
-            { value: '100K+', label: 'Approvals Scanned' },
-            { value: '$2.4M', label: 'Risk Identified' },
-            { value: '3', label: 'Chains Monitored' },
-          ].map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <div className="font-mono text-2xl font-bold text-accent">{value}</div>
-              <div className="text-xs text-text-dim mt-1">{label}</div>
-            </div>
-          ))}
+          <div className="text-center">
+            <AnimatedCounter end={100000} suffix="+" />
+            <div className="text-xs text-text-dim mt-1">Approvals Scanned</div>
+          </div>
+          <div className="text-center">
+            <AnimatedCounter end={2400000} prefix="$" />
+            <div className="text-xs text-text-dim mt-1">Risk Identified</div>
+          </div>
+          <div className="text-center">
+            <AnimatedCounter end={3} duration={800} />
+            <div className="text-xs text-text-dim mt-1">Chains Monitored</div>
+          </div>
         </div>
       </main>
     </div>

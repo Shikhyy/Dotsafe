@@ -16,6 +16,9 @@ interface DotSafeStore {
   selectAllDanger: () => void;
   clearSelection: () => void;
 
+  // Remove revoked approvals from results
+  removeApprovals: (ids: string[]) => void;
+
   // Update a single approval's AI score
   updateApprovalScore: (id: string, score: ApprovalData['aiScore']) => void;
 
@@ -48,6 +51,30 @@ export const useDotSafeStore = create<DotSafeStore>((set, get) => ({
       return { selectedIds: ids };
     }),
   clearSelection: () => set({ selectedIds: new Set() }),
+
+  removeApprovals: (ids) =>
+    set((state) => {
+      if (!state.scanResult) return {};
+      const idSet = new Set(ids);
+      const approvals = state.scanResult.approvals.filter((a) => !idSet.has(a.id));
+      const dangerCount = approvals.filter((a) => a.aiScore?.riskLevel === 'DANGER').length;
+      const cautionCount = approvals.filter((a) => a.aiScore?.riskLevel === 'CAUTION').length;
+      const safeCount = approvals.filter((a) => a.aiScore?.riskLevel === 'SAFE').length;
+      const scores = approvals.map((a) => a.aiScore?.riskScore ?? 0);
+      const overallRiskScore = scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : 0;
+      return {
+        scanResult: {
+          ...state.scanResult,
+          approvals,
+          dangerCount,
+          cautionCount,
+          safeCount,
+          overallRiskScore,
+        },
+      };
+    }),
 
   updateApprovalScore: (id, score) =>
     set((state) => {

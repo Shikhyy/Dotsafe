@@ -125,6 +125,16 @@ export const ERC20_ABI = [
   },
 ] as const;
 
+export const ERC721_ABI = [
+  {
+    inputs: [{ name: 'operator', type: 'address' }, { name: 'approved', type: 'bool' }],
+    name: 'setApprovalForAll',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+] as const;
+
 // Contract addresses — update after deployment
 export const CONTRACT_ADDRESSES = {
   approvalScanner: '0x0000000000000000000000000000000000000000' as `0x${string}`,

@@ -14,14 +14,14 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {},
     polkadotHub: {
-      url: process.env.POLKADOT_HUB_RPC || "https://polkadot-asset-hub-rpc.polkadot.io",
+      url: process.env.POLKADOT_HUB_RPC || "https://polkadot-asset-hub-eth-rpc.polkadot.io",
       chainId: 420420421,
       accounts: process.env.DEPLOYER_PRIVATE_KEY
         ? [process.env.DEPLOYER_PRIVATE_KEY]
         : [],
     },
     westendAssetHub: {
-      url: process.env.WESTEND_RPC || "https://westend-asset-hub-rpc.polkadot.io",
+      url: process.env.WESTEND_RPC || "https://westend-asset-hub-eth-rpc.polkadot.io",
       chainId: 420420420,
       accounts: process.env.DEPLOYER_PRIVATE_KEY
         ? [process.env.DEPLOYER_PRIVATE_KEY]

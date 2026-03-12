@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { ApprovalData } from '@/lib/types';
 import { RiskBadge } from './RiskBadge';
@@ -9,6 +9,27 @@ import { truncateAddress, formatAllowance } from '@/lib/scanner';
 import { useDotSafeStore } from '@/store';
 import { useBatchRevoke } from '@/hooks/useBatchRevoke';
 import { ChevronDown, X } from 'lucide-react';
+
+function AnimatedScore({ value, className }: { value: number; className?: string }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<number>(0);
+
+  useEffect(() => {
+    const start = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / 800, 1);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.round(eased * value));
+      if (progress < 1) ref.current = requestAnimationFrame(animate);
+    };
+    ref.current = requestAnimationFrame(animate);
+    return () => { if (ref.current) cancelAnimationFrame(ref.current); };
+  }, [value]);
+
+  return <span className={className}>{display}</span>;
+}
 
 interface ApprovalRowProps {
   approval: ApprovalData;
@@ -41,12 +62,14 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
 
   return (
     <motion.div
+      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -200, backgroundColor: 'rgba(0,229,160,0.1)' }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
     >
       <div
-        className={`grid grid-cols-[32px_1fr_44px_70px_80px] gap-3.5 items-center px-4 py-3 border border-border rounded-lg
+        className={`grid grid-cols-[24px_1fr_80px] md:grid-cols-[32px_1fr_44px_70px_80px] gap-2 md:gap-3.5 items-center px-3 md:px-4 py-3 border border-border rounded-lg
                     hover:border-border-2 hover:bg-surface-2 transition-all duration-200 cursor-pointer ${rowBg}
                     ${isSelected ? 'border-accent/50' : ''}`}
         onClick={() => setIsExpanded(!isExpanded)}
@@ -78,7 +101,9 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-text-muted font-mono">
-              Spender: {truncateAddress(approval.spenderAddress)}
+              Spender: {approval.spenderName ? (
+                <span className="text-text">{approval.spenderName}</span>
+              ) : truncateAddress(approval.spenderAddress)}
             </span>
             <span className="text-xs text-text-dim">
               {approval.isUnlimited ? '∞ Unlimited' : formatAllowance(approval.allowanceRaw, approval.tokenDecimals)}
@@ -86,8 +111,8 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
           </div>
         </div>
 
-        {/* Score circle */}
-        <div className="flex items-center justify-center">
+        {/* Score circle — hidden on mobile */}
+        <div className="hidden md:flex items-center justify-center">
           {riskScore !== undefined ? (
             <div className="relative w-9 h-9">
               <svg className="w-9 h-9 -rotate-90" viewBox="0 0 36 36">
@@ -99,7 +124,7 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
                 />
               </svg>
               <span className="absolute inset-0 flex items-center justify-center font-mono text-[10px] font-bold text-text">
-                {riskScore}
+                <AnimatedScore value={riskScore} />
               </span>
             </div>
           ) : (
@@ -107,8 +132,8 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
           )}
         </div>
 
-        {/* Risk badge */}
-        <div>
+        {/* Risk badge — hidden on mobile */}
+        <div className="hidden md:block">
           {approval.aiScore ? (
             <RiskBadge level={riskLevel} />
           ) : (
