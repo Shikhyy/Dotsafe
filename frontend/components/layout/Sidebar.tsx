@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Shield, LayoutDashboard, Globe, History } from 'lucide-react';
+import { Shield, LayoutDashboard, Globe, History, FileCheck } from 'lucide-react';
 import { RiskMeter } from '@/components/stats/RiskMeter';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/policy', icon: FileCheck, label: 'Policies' },
   { href: '/xcm', icon: Globe, label: 'XCM Guard' },
   { href: '/history', icon: History, label: 'History' },
 ];

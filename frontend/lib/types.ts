@@ -63,5 +63,6 @@ export interface ParachainStatus {
   approvalCount: number;
   riskLevel: RiskLevel;
   isScanning: boolean;
+  countLabel?: string;
   approvals?: ParachainApproval[];
 }

@@ -50,6 +50,70 @@ body {
   z-index: 50;
 }
 
+/* Connect Button Styling */
+@keyframes glow-pulse {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(232, 23, 93, 0.4), 
+                0 0 40px rgba(232, 23, 93, 0.2),
+                inset 0 0 20px rgba(232, 23, 93, 0.1);
+  }
+  50% { 
+    box-shadow: 0 0 30px rgba(232, 23, 93, 0.6), 
+                0 0 60px rgba(232, 23, 93, 0.3),
+                inset 0 0 20px rgba(232, 23, 93, 0.15);
+  }
+}
+
+@keyframes border-glow {
+  0%, 100% { border-color: rgba(232, 23, 93, 0.5); }
+  50% { border-color: rgba(232, 23, 93, 0.8); }
+}
+
+.dotsafe-connect-btn {
+  background: linear-gradient(135deg, #E8175D 0%, #B81250 50%, #8A0E40 100%);
+  border: 2px solid rgba(232, 23, 93, 0.5);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  min-width: 180px;
+  padding: 12px 28px !important;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.5px;
+  animation: glow-pulse 3s ease-in-out infinite;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dotsafe-connect-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  animation: shimmer 2.5s infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.dotsafe-connect-btn:hover {
+  background: linear-gradient(135deg, #F02E7B 0%, #C51A5F 50%, #A01855 100%);
+  border-color: rgba(232, 23, 93, 0.9);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(232, 23, 93, 0.4), 
+              0 0 30px rgba(232, 23, 93, 0.3),
+              inset 0 0 20px rgba(232, 23, 93, 0.2) !important;
+}
+
+.dotsafe-connect-btn:active {
+  transform: translateY(-1px) scale(0.98);
+  box-shadow: 0 6px 20px rgba(232, 23, 93, 0.3),
+              inset 0 0 15px rgba(232, 23, 93, 0.15) !important;
+}
+
 /* Risk dot animations */
 @keyframes pulse-danger {
   0%, 100% { opacity: 1; }

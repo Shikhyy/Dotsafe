@@ -1,43 +1,152 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { getContract, prepareContractCall, readContract } from 'thirdweb';
+import { useActiveAccount, useActiveWalletChain, useSendTransaction } from 'thirdweb/react';
+import { CONTRACT_ADDRESSES, XCM_GUARD_ABI, ZERO_ADDRESS } from '@/lib/contracts';
+import { thirdwebClient } from '@/lib/wagmi';
+import { polkadotHub } from '@/lib/chains';
+import { useToast } from '@/components/Toast';
 import type { ParachainStatus } from '@/lib/types';
 
 const PARACHAINS: ParachainStatus[] = [
-  { paraId: 2004, name: 'Moonbeam', approvalCount: 0, riskLevel: 'SAFE', isScanning: false },
-  { paraId: 2006, name: 'Astar', approvalCount: 0, riskLevel: 'SAFE', isScanning: false },
-  { paraId: 2000, name: 'Acala', approvalCount: 0, riskLevel: 'SAFE', isScanning: false },
+  { paraId: 2004, name: 'Moonbeam', approvalCount: 0, riskLevel: 'SAFE', isScanning: false, countLabel: 'Alerts Sent' },
+  { paraId: 2006, name: 'Astar', approvalCount: 0, riskLevel: 'SAFE', isScanning: false, countLabel: 'Alerts Sent' },
+  { paraId: 2000, name: 'Acala', approvalCount: 0, riskLevel: 'SAFE', isScanning: false, countLabel: 'Alerts Sent' },
 ];
+
+const PARACHAIN_NAMES: Record<number, string> = {
+  2004: 'Moonbeam',
+  2006: 'Astar',
+  2000: 'Acala',
+};
 
 export function useXCMGuard() {
   const [chains, setChains] = useState<ParachainStatus[]>(PARACHAINS);
   const [scanning, setScanning] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [totalAlerts, setTotalAlerts] = useState(0);
+  const account = useActiveAccount();
+  const activeChain = useActiveWalletChain();
+  const chain = activeChain ?? polkadotHub;
+  const { mutateAsync: sendTransaction } = useSendTransaction();
+  const { addToast } = useToast();
+
+  const contractReady = CONTRACT_ADDRESSES.xcmGuard !== ZERO_ADDRESS;
+
+  const refresh = useCallback(async () => {
+    if (!contractReady) {
+      setChains(PARACHAINS);
+      setTotalAlerts(0);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const contract = getContract({
+        client: thirdwebClient,
+        chain,
+        address: CONTRACT_ADDRESSES.xcmGuard,
+        abi: XCM_GUARD_ABI,
+      });
+
+      const monitoredParachains = await readContract({
+        contract,
+        method: 'getMonitoredParachains',
+        params: [],
+      }) as readonly number[];
+
+      const alertCounts = await Promise.all(
+        monitoredParachains.map(async (paraId) => {
+          const count = await readContract({
+            contract,
+            method: 'alertCount',
+            params: [paraId],
+          }) as bigint;
+
+          return { paraId, count };
+        })
+      );
+
+      const total = await readContract({
+        contract,
+        method: 'totalAlerts',
+        params: [],
+      }) as bigint;
+
+      setChains(alertCounts.map(({ paraId, count }) => ({
+        paraId,
+        name: PARACHAIN_NAMES[paraId] ?? `Para ${paraId}`,
+        approvalCount: Number(count),
+        riskLevel: count > 0n ? 'CAUTION' : 'SAFE',
+        isScanning: false,
+        approvals: [],
+        countLabel: 'Alerts Sent',
+      })));
+      setTotalAlerts(Number(total));
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'XCM Sync Failed',
+        message: 'Could not read XCMGuard status from the connected chain.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [addToast, chain, contractReady]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const scanAllParachains = useCallback(async () => {
+    if (!contractReady) {
+      addToast({
+        type: 'warning',
+        title: 'XCMGuard Not Configured',
+        message: 'Set NEXT_PUBLIC_XCM_GUARD_ADDRESS to read live parachain status.',
+      });
+      return;
+    }
+
     setScanning(true);
     setChains((prev) => prev.map((c) => ({ ...c, isScanning: true })));
 
-    // Simulated scan — in production, calls XCMGuard.sol + parachain RPCs
-    await new Promise((r) => setTimeout(r, 2000));
+    try {
+      if (account?.address) {
+        const contract = getContract({
+          client: thirdwebClient,
+          chain,
+          address: CONTRACT_ADDRESSES.xcmGuard,
+          abi: XCM_GUARD_ABI,
+        });
 
-    setChains([
-      {
-        paraId: 2004, name: 'Moonbeam', approvalCount: 2, riskLevel: 'DANGER', isScanning: false,
-        approvals: [
-          { tokenSymbol: 'GLMR', spenderAddress: '0x7a3B...4f2E', isUnlimited: true, riskLevel: 'DANGER', riskScore: 78 },
-          { tokenSymbol: 'xcDOT', spenderAddress: '0x2c1F...9aB3', isUnlimited: true, riskLevel: 'DANGER', riskScore: 85 },
-        ],
-      },
-      {
-        paraId: 2006, name: 'Astar', approvalCount: 1, riskLevel: 'CAUTION', isScanning: false,
-        approvals: [
-          { tokenSymbol: 'ASTR', spenderAddress: '0x5e8D...1c7A', isUnlimited: false, riskLevel: 'CAUTION', riskScore: 42 },
-        ],
-      },
-      { paraId: 2000, name: 'Acala', approvalCount: 0, riskLevel: 'SAFE', isScanning: false, approvals: [] },
-    ]);
-    setScanning(false);
-  }, []);
+        for (const parachain of chains) {
+          try {
+            const tx = prepareContractCall({
+              contract,
+              method: 'requestCrossChainScan',
+              params: [parachain.paraId, account.address, '0x'],
+            });
+            await sendTransaction(tx);
+          } catch {
+            // Keep syncing readable state even if the chain is not ready for live XCM payloads.
+          }
+        }
+      }
 
-  return { chains, scanning, scanAllParachains };
+      await refresh();
+      addToast({
+        type: 'success',
+        title: 'XCM Status Synced',
+        message: 'Monitored parachain status was refreshed from XCMGuard.',
+      });
+    } finally {
+      setChains((prev) => prev.map((c) => ({ ...c, isScanning: false })));
+      setScanning(false);
+    }
+  }, [account?.address, addToast, chain, chains, contractReady, refresh, sendTransaction]);
+
+  return { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains, refresh };
 }

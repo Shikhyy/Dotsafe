@@ -8,7 +8,7 @@ import { AIReasoningCard } from './AIReasoningCard';
 import { truncateAddress, formatAllowance } from '@/lib/scanner';
 import { useDotSafeStore } from '@/store';
 import { useBatchRevoke } from '@/hooks/useBatchRevoke';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Plus } from 'lucide-react';
 
 function AnimatedScore({ value, className }: { value: number; className?: string }) {
   const [display, setDisplay] = useState(0);
@@ -19,7 +19,6 @@ function AnimatedScore({ value, className }: { value: number; className?: string
     const animate = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / 800, 1);
-      // ease-out cubic
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(Math.round(eased * value));
       if (progress < 1) ref.current = requestAnimationFrame(animate);
@@ -29,6 +28,20 @@ function AnimatedScore({ value, className }: { value: number; className?: string
   }, [value]);
 
   return <span className={className}>{display}</span>;
+}
+
+function formatAge(timestamp: number): string {
+  if (!timestamp) return '';
+  const seconds = Math.floor(Date.now() / 1000 - timestamp);
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days}d ago`;
+  const months = Math.floor(days / 30);
+  return `${months}mo ago`;
 }
 
 interface ApprovalRowProps {
@@ -42,6 +55,7 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
   const { singleRevoke } = useBatchRevoke();
   const isSelected = selectedIds.has(approval.id);
   const isRevoking = appState === 'REVOKING';
+  const hasBatchSelection = selectedIds.size > 0;
 
   const riskLevel = approval.aiScore?.riskLevel ?? 'CAUTION';
   const riskScore = approval.aiScore?.riskScore;
@@ -69,13 +83,13 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
       transition={{ delay: index * 0.05, duration: 0.3 }}
     >
       <div
-        className={`grid grid-cols-[24px_1fr_80px] md:grid-cols-[32px_1fr_44px_70px_80px] gap-2 md:gap-3.5 items-center px-3 md:px-4 py-3 border border-border rounded-lg
+        className={`group grid grid-cols-[24px_1fr_80px] md:grid-cols-[32px_1fr_44px_70px_80px] gap-2 md:gap-3.5 items-center px-3 md:px-4 py-3 border border-border rounded-lg
                     hover:border-border-2 hover:bg-surface-2 transition-all duration-200 cursor-pointer ${rowBg}
-                    ${isSelected ? 'border-accent/50' : ''}`}
+                    ${isSelected ? 'border-accent/50 bg-accent/[0.03]' : ''}`}
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        {/* Risk dot + checkbox */}
-        <div className="flex items-center justify-center">
+        {/* Risk dot / checkbox */}
+        <div className="flex items-center justify-center relative">
           <input
             type="checkbox"
             checked={isSelected}
@@ -84,9 +98,9 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
               toggleSelected(approval.id);
             }}
             onClick={(e) => e.stopPropagation()}
-            className="hidden group-hover:block peer"
+            className={`w-3.5 h-3.5 accent-accent cursor-pointer ${hasBatchSelection || isSelected ? 'block' : 'hidden group-hover:block'} absolute`}
           />
-          <div className={`w-2.5 h-2.5 rounded-full ${dotClass}`} />
+          <div className={`w-2.5 h-2.5 rounded-full ${dotClass} ${hasBatchSelection || isSelected ? 'hidden' : 'block group-hover:hidden'}`} />
         </div>
 
         {/* Token + spender info */}
@@ -98,6 +112,11 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
             <span className="text-xs text-text-dim px-1.5 py-0.5 bg-surface-2 rounded">
               {approval.tokenType}
             </span>
+            {approval.approvalTimestamp > 0 && (
+              <span className="text-xs text-text-dim hidden md:inline">
+                {formatAge(approval.approvalTimestamp)}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-xs text-text-muted font-mono">
@@ -163,7 +182,7 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
       </div>
 
       <AnimatePresence>
-        {isExpanded && approval.aiScore && (
+        {isExpanded && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
@@ -171,7 +190,53 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
             transition={{ duration: 0.3 }}
             className="overflow-hidden mt-2 mb-1"
           >
-            <AIReasoningCard score={approval.aiScore} />
+            {approval.aiScore ? (
+              <AIReasoningCard score={approval.aiScore} />
+            ) : (
+              <div className="ml-[46px] p-4 bg-surface-2 border border-border rounded-lg text-sm text-text-muted">
+                AI scoring in progress...
+              </div>
+            )}
+
+            {/* Action buttons in expanded view */}
+            <div className="ml-[46px] flex items-center gap-2 mt-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  singleRevoke(approval);
+                }}
+                disabled={isRevoking}
+                className="px-3 py-1.5 text-xs border border-red/40 text-red rounded-md
+                           hover:bg-red hover:text-white transition-all duration-200
+                           disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                Revoke This Approval
+              </button>
+              {!isSelected && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleSelected(approval.id);
+                  }}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs border border-border-2 text-text-muted rounded-md
+                             hover:bg-surface-2 transition-colors cursor-pointer"
+                >
+                  <Plus size={12} />
+                  Add to Batch
+                </button>
+              )}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(false);
+                }}
+                className="flex items-center gap-1 px-3 py-1.5 text-xs border border-border-2 text-text-muted rounded-md
+                           hover:bg-surface-2 transition-colors cursor-pointer"
+              >
+                <X size={12} />
+                Close
+              </button>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

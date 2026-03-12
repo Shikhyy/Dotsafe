@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Globe, History } from 'lucide-react';
+import { LayoutDashboard, Globe, History, FileCheck } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/policy', icon: FileCheck, label: 'Policy' },
   { href: '/xcm', icon: Globe, label: 'XCM' },
   { href: '/history', icon: History, label: 'History' },
 ];

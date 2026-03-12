@@ -48,7 +48,7 @@ export function ChainCard({ chain }: ChainCardProps) {
         ) : (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Approvals Found</span>
+              <span className="text-xs text-text-muted">{chain.countLabel ?? 'Approvals Found'}</span>
               <span className="font-mono text-lg text-text">{chain.approvalCount}</span>
             </div>
             <div className="flex items-center justify-between">

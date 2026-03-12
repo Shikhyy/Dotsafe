@@ -7,7 +7,7 @@ import { ChainCard } from '@/components/xcm/ChainCard';
 import { Shield, Globe, Loader2, Radar } from 'lucide-react';
 
 export default function XCMPage() {
-  const { chains, scanning, scanAllParachains } = useXCMGuard();
+  const { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains } = useXCMGuard();
 
   return (
     <AppLayout>
@@ -27,12 +27,12 @@ export default function XCMPage() {
             {scanning ? (
               <>
                 <Loader2 size={12} className="animate-spin" />
-                Scanning...
+                Syncing...
               </>
             ) : (
               <>
                 <Radar size={12} />
-                Scan All Parachains
+                Sync XCM Status
               </>
             )}
           </button>
@@ -44,9 +44,24 @@ export default function XCMPage() {
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-text mb-1">Monitored Parachains</h3>
           <p className="text-sm text-text-muted">
-            DotSafe monitors token approvals across Polkadot parachains via XCM.
-            Scan to detect risky approvals on connected chains.
+            DotSafe reads live monitoring state from the on-chain XCMGuard contract on Polkadot Hub.
+            Use sync to refresh monitored parachains and alert counts.
           </p>
+        </div>
+
+        <div className="mb-4 p-4 bg-surface border border-border rounded-xl">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <div className="text-xs text-text-muted mb-1">XCMGuard Connection</div>
+              <div className="text-sm font-semibold text-text">
+                {contractReady ? 'Connected to deployed contract' : 'Contract address not configured'}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs text-text-muted mb-1">Total Alerts</div>
+              <div className="text-lg font-mono text-text">{loading ? '...' : totalAlerts}</div>
+            </div>
+          </div>
         </div>
 
         {/* Chain grid */}
@@ -64,9 +79,8 @@ export default function XCMPage() {
               <h4 className="text-sm font-semibold text-text mb-1">How XCM Guard Works</h4>
               <p className="text-xs text-text-muted leading-relaxed">
                 XCM Guard uses Polkadot Hub&apos;s native XCM precompile to send cross-chain messages
-                to connected parachains. It queries approval state on Moonbeam, Astar, and Acala,
-                then surfaces risky approvals in a unified dashboard. This is the only wallet
-                security tool that works across the entire Polkadot ecosystem.
+                to connected parachains. The dashboard now reads the monitored parachain set and
+                recorded alert counts directly from the deployed XCMGuard contract instead of mock data.
               </p>
             </div>
           </div>

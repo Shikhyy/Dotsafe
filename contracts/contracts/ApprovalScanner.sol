@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.25;
 
 /// @title ApprovalScanner
 /// @notice On-chain helper for reading live ERC-20/721/1155 approval state
