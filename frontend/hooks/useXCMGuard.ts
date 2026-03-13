@@ -124,10 +124,16 @@ export function useXCMGuard() {
 
         for (const parachain of chains) {
           try {
+            // Encode paraId + wallet as ABI parameters for the XCM precompile call
+            // Format: 32-byte padded uint32 (paraId) + 32-byte padded address (wallet)
+            const paraIdHex = parachain.paraId.toString(16).padStart(64, '0');
+            const walletHex = account.address.slice(2).padStart(64, '0');
+            const xcmPayload = `0x${paraIdHex}${walletHex}` as `0x${string}`;
+
             const tx = prepareContractCall({
               contract,
               method: 'requestCrossChainScan',
-              params: [parachain.paraId, account.address, '0x'],
+              params: [parachain.paraId, account.address, xcmPayload],
             });
             await sendTransaction(tx);
           } catch {

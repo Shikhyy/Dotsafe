@@ -5,12 +5,17 @@
     "compile": "hardhat compile",
     "test": "hardhat test",
     "deploy:testnet": "hardhat ignition deploy ignition/modules/DotSafe.ts --network westendAssetHub",
-    "deploy:mainnet": "hardhat ignition deploy ignition/modules/DotSafe.ts --network polkadotHub"
+    "deploy:mainnet": "hardhat ignition deploy ignition/modules/DotSafe.ts --network polkadotHub",
+    "seed:testnet": "hardhat run scripts/seedDemo.ts --network westendAssetHub",
+    "seed:mainnet": "hardhat run scripts/seedDemo.ts --network polkadotHub"
   },
   "license": "MIT",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.0"
+    "@parity/hardhat-polkadot": "^0.2.7",
+    "dotenv": "^17.3.1",
+    "hardhat": "^2.22.0",
+    "solc": "^0.8.28"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^5.1.0"

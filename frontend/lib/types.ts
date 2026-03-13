@@ -1,14 +1,30 @@
 export type RiskLevel = 'SAFE' | 'CAUTION' | 'DANGER';
+export type ConfidenceLevel = 'VERY_LOW' | 'LOW' | 'MEDIUM' | 'HIGH';
+export type RiskTrend = 'INCREASING' | 'STABLE' | 'DECREASING';
 export type TokenType = 'ERC20' | 'ERC721' | 'ERC1155';
+
+export interface RiskFactors {
+  critical?: string[];
+  high?: string[];
+  medium?: string[];
+}
 
 export interface AIRiskScore {
   riskLevel: RiskLevel;
   riskScore: number;
+  confidence: number;
+  confidenceLevel: ConfidenceLevel;
   reasons: string[];
+  riskFactors?: RiskFactors;
+  mitigations?: string[];
   recommendation: string;
   isUpgradeable: boolean;
   isVerified: boolean;
   contractAge: number;
+  isStablecoin?: boolean;
+  isDeFiProtocol?: boolean;
+  riskTrend?: RiskTrend;
+  aiModel?: string;
   scoredAt: number;
 }
 
