@@ -16,7 +16,11 @@ const config: HardhatUserConfig = {
     },
   },
   resolc: {
-    compilerSource: "npm",
+    compilerSource: "binary",
+    version: "0.5.0",
+    settings: {
+      resolcPath: "/Users/shikhar/Library/Caches/hardhat-nodejs/compilers-v2/macosx-amd64/resolc-universal-apple-darwin+commit.046455",
+    },
   },
   networks: {
     hardhat: {},
@@ -37,6 +41,13 @@ const config: HardhatUserConfig = {
         : [],
       gas: 5000000,
       gasPrice: 1000000000,
+    },
+    moonbaseAlpha: {
+      url: "https://rpc.api.moonbase.moonbeam.network",
+      chainId: 1287,
+      accounts: process.env.DEPLOYER_PRIVATE_KEY
+        ? [process.env.DEPLOYER_PRIVATE_KEY]
+        : [],
     },
   },
 };
