@@ -44,48 +44,50 @@ async function deployContract(api, signer, name, bytecode) {
   const WEIGHT_PROOF_SIZE = 1_000_000n;
   const STORAGE_DEPOSIT_LIMIT = null; // let runtime calculate
 
+  const tx = api.tx.revive.instantiateWithCode(
+    0, // value (no native token transfer)
+    { refTime: WEIGHT_REF_TIME, proofSize: WEIGHT_PROOF_SIZE },
+    STORAGE_DEPOSIT_LIMIT,
+    codeBytes,
+    "0x", // constructor data (empty for no-arg constructors)
+    null // salt
+  );
+
+  // Fetch nonce and use immortal era (0x00 + genesisHash) to avoid "ancient birth block"
+  const immortalEra = api.createType("ExtrinsicEra");
+  const nonce = await api.rpc.system.accountNextIndex(signer.address);
+
   return new Promise((resolve, reject) => {
     let contractAddress = null;
-    const tx = api.tx.revive.instantiateWithCode(
-      0, // value (no native token transfer)
-      { refTime: WEIGHT_REF_TIME, proofSize: WEIGHT_PROOF_SIZE },
-      STORAGE_DEPOSIT_LIMIT,
-      codeBytes,
-      "0x", // constructor data (empty for no-arg constructors)
-      null // salt (null = use account nonce-based derivation)
-    );
-
-    // Use immortal era to avoid "ancient birth block" errors during slow API init
-    tx.signAndSend(signer, { era: 0, blockHash: api.genesisHash }, ({ status, events, dispatchError }) => {
-      if (dispatchError) {
-        if (dispatchError.isModule) {
-          const decoded = api.registry.findMetaError(dispatchError.asModule);
-          reject(
-            new Error(`${name} deploy failed: ${decoded.section}.${decoded.name}: ${decoded.docs}`)
-          );
-        } else {
-          reject(new Error(`${name} deploy failed: ${dispatchError.toString()}`));
+    tx.signAndSend(
+      signer,
+      { nonce, era: immortalEra, blockHash: api.genesisHash },
+      ({ status, events, dispatchError }) => {
+        if (dispatchError) {
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            reject(new Error(`${name} deploy failed: ${decoded.section}.${decoded.name}: ${decoded.docs}`));
+          } else {
+            reject(new Error(`${name} deploy failed: ${dispatchError.toString()}`));
+          }
+          return;
         }
-        return;
-      }
-
-      if (status.isInBlock || status.isFinalized) {
-        for (const { event } of events) {
-          if (api.events.revive?.Instantiated?.is(event)) {
-            contractAddress = event.data.contract?.toString() || event.data[1]?.toString();
-          }
-          if (api.events.system.ExtrinsicSuccess.is(event)) {
-            console.log(
-              `  ✅ ${name} deployed at: ${contractAddress || "address in events above"}`
-            );
-            resolve(contractAddress);
-          }
-          if (api.events.system.ExtrinsicFailed.is(event)) {
-            reject(new Error(`${name} extrinsic failed`));
+        if (status.isInBlock || status.isFinalized) {
+          for (const { event } of events) {
+            if (api.events.revive?.Instantiated?.is(event)) {
+              contractAddress = event.data.contract?.toString() || event.data[1]?.toString();
+            }
+            if (api.events.system.ExtrinsicSuccess.is(event)) {
+              console.log(`  ✅ ${name} deployed at: ${contractAddress || "check events"}`);
+              resolve(contractAddress);
+            }
+            if (api.events.system.ExtrinsicFailed.is(event)) {
+              reject(new Error(`${name} extrinsic failed`));
+            }
           }
         }
       }
-    }).catch(reject);
+    ).catch(reject);
   });
 }
 
