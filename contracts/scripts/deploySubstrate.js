@@ -151,6 +151,50 @@ Usage:
   }
   console.log("✅ pallet-revive available\n");
 
+  // Map the account to an EVM address (required once per account before any revive tx)
+  console.log("Mapping account to EVM address (required by pallet-revive)...");
+  const immortalEra = api.createType("ExtrinsicEra");
+  const nonce0 = await api.rpc.system.accountNextIndex(signer.address);
+  await new Promise((resolve, reject) => {
+    api.tx.revive.mapAccount().signAndSend(
+      signer,
+      { nonce: nonce0, era: immortalEra, blockHash: api.genesisHash },
+      ({ status, events, dispatchError }) => {
+        if (dispatchError) {
+          // AccountAlreadyMapped is fine — just means it was already done
+          const errStr = dispatchError.toString();
+          if (errStr.includes("AlreadyMapped") || errStr.includes("AccountAlreadyMapped")) {
+            console.log("  ℹ️  Account already mapped, continuing...");
+            resolve();
+          } else {
+            reject(new Error(`mapAccount failed: ${errStr}`));
+          }
+          return;
+        }
+        if (status.isInBlock || status.isFinalized) {
+          for (const { event } of events) {
+            if (api.events.system.ExtrinsicSuccess.is(event)) {
+              console.log("  ✅ Account mapped successfully");
+              resolve();
+            }
+            if (api.events.system.ExtrinsicFailed.is(event)) {
+              // Check if it's AlreadyMapped
+              const decoded = events.find(({ event: e }) =>
+                api.events.revive?.AccountAlreadyMapped?.is(e)
+              );
+              if (decoded) {
+                console.log("  ℹ️  Account already mapped, continuing...");
+                resolve();
+              } else {
+                reject(new Error("mapAccount extrinsic failed"));
+              }
+            }
+          }
+        }
+      }
+    ).catch(reject);
+  });
+
   // Load PVM bytecodes
   const contracts = ["ApprovalScanner", "BatchRevoker", "XCMGuard", "ApprovalPolicy"];
   const addresses = {};
