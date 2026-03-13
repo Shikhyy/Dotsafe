@@ -20,6 +20,10 @@ const config: HardhatUserConfig = {
     version: "0.5.0",
     settings: {
       resolcPath: "/Users/shikhar/Library/Caches/hardhat-nodejs/compilers-v2/macosx-amd64/resolc-universal-apple-darwin+commit.046455",
+      memoryConfig: {
+        stackSize: 65536,
+        heapSize: 65536,
+      },
     },
   },
   networks: {
