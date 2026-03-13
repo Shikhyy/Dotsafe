@@ -40,8 +40,8 @@ function loadArtifact(contractName) {
 async function deployContract(api, signer, name, bytecode) {
   console.log(`\nDeploying ${name}...`);
   const codeBytes = hexToU8a(bytecode);
-  const WEIGHT_REF_TIME = 10_000_000_000n;
-  const WEIGHT_PROOF_SIZE = 1_000_000n;
+  const WEIGHT_REF_TIME = 50_000_000_000n;
+  const WEIGHT_PROOF_SIZE = 5_000_000n;
   const STORAGE_DEPOSIT_LIMIT = null; // let runtime calculate
 
   const tx = api.tx.revive.instantiateWithCode(
