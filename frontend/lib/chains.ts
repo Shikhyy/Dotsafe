@@ -11,7 +11,7 @@ export const polkadotHub = defineChain({
 });
 
 export const westendAssetHub = defineChain({
-  id: 420420420,
+  id: 420420421,
   name: 'Westend Asset Hub',
   nativeCurrency: { name: 'WND', symbol: 'WND', decimals: 10 },
   rpc: 'https://westend-asset-hub-eth-rpc.polkadot.io',

@@ -30,15 +30,19 @@ export async function fetchApprovalEvents(
     // ignore
   }
 
+  // Scan at most 500,000 blocks back (~35 days at 6s/block) to avoid timeouts on large chains
+  const LOOKBACK_BLOCKS = 500_000n;
+  const startBlock = currentBlock > LOOKBACK_BLOCKS ? currentBlock - LOOKBACK_BLOCKS : 0n;
+
   // Fetch ERC-20 Approval events and ApprovalForAll events in parallel
   const [erc20Logs, erc721Logs] = await Promise.all([
     eth_getLogs(rpcClient, {
-      fromBlock: 0n,
+      fromBlock: startBlock,
       toBlock: 'latest',
       topics: [APPROVAL_TOPIC, ownerTopic],
     }).catch(() => []),
     eth_getLogs(rpcClient, {
-      fromBlock: 0n,
+      fromBlock: startBlock,
       toBlock: 'latest',
       topics: [APPROVAL_FOR_ALL_TOPIC, ownerTopic],
     }).catch(() => []),

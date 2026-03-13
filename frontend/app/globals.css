@@ -69,6 +69,11 @@ body {
   50% { border-color: rgba(232, 23, 93, 0.8); }
 }
 
+/* Override thirdweb ConnectButton wrapper background */
+div:has(> .dotsafe-connect-btn) {
+  background: transparent !important;
+}
+
 .dotsafe-connect-btn {
   background: linear-gradient(135deg, #E8175D 0%, #B81250 50%, #8A0E40 100%);
   border: 2px solid rgba(232, 23, 93, 0.5);

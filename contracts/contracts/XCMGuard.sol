@@ -71,8 +71,10 @@ contract XCMGuard is AccessControl, Pausable {
     ) external onlyRole(OPERATOR_ROLE) whenNotPaused {
         if (!isMonitored[destParaId]) revert ParachainNotMonitored(destParaId);
 
-        (bool success, ) = XCM_PRECOMPILE.call(encodedXcmMsg);
-        if (!success) revert XCMCallFailed();
+        // Best-effort XCM call — alert is recorded on-chain regardless of XCM delivery
+        if (encodedXcmMsg.length > 0) {
+            XCM_PRECOMPILE.call(encodedXcmMsg);
+        }
 
         alertCount[destParaId]++;
         totalAlerts++;
@@ -90,8 +92,10 @@ contract XCMGuard is AccessControl, Pausable {
     ) external onlyRole(OPERATOR_ROLE) whenNotPaused {
         if (!isMonitored[destParaId]) revert ParachainNotMonitored(destParaId);
 
-        (bool success, ) = XCM_PRECOMPILE.call(encodedXcmMsg);
-        if (!success) revert XCMCallFailed();
+        // Best-effort XCM call — scan request is recorded on-chain regardless of XCM delivery
+        if (encodedXcmMsg.length > 0) {
+            XCM_PRECOMPILE.call(encodedXcmMsg);
+        }
 
         emit CrossChainScanRequested(destParaId, wallet, msg.sender);
     }

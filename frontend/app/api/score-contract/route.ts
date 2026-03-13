@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       rateMap.set(ip, { count: 1, resetAt: now + 1000 });
     }
 
-    const prompt = `You are a smart contract security analyzer for the Polkadot Hub EVM ecosystem — the first EVM-compatible execution environment on Polkadot. Analyze this token approval and return a JSON risk assessment.
+    const prompt = `You are a smart contract security analyzer for the Polkadot Hub EVM ecosystem — the first EVM-compatible execution environment on Polkadot. Analyze this token approval and return a comprehensive JSON risk assessment with confidence scoring.
 
 Contract Address: ${contractAddress}
 Chain: Polkadot Hub (chainId: ${chainId})
@@ -47,38 +47,77 @@ Allowance Amount: ${allowanceAmount}
 Is Unlimited: ${isUnlimited}
 Approval Age (seconds): ${approvalAge}
 
-Risk Factor Rules:
-- Unverified source code: +30 points
-- Unlimited allowance (especially for stablecoins like USDT, USDC, DAI, aUSD): +25 points
-- Contract age < 30 days: +20 points
-- Upgradeable proxy pattern: +15 points
-- Approval idle > 90 days with no transactions: +10 points
-- DeFi protocol with unlocked admin keys: +20 points
-- Token is a stablecoin with unlimited approval: +30 points (critical — stablecoins hold real dollar value)
-- Known audited DeFi protocol (Aave, Compound, Uniswap, StellaSwap, Beamswap, ArthSwap): -15 points
-- Contract deployed via OpenZeppelin libraries: -10 points
+ADVANCED RISK FACTOR ANALYSIS:
 
-Polkadot Hub-specific considerations:
-- Polkadot Hub is new, so most contracts are young — weigh contract age less heavily
-- Cross-chain approvals via XCM to parachains (Moonbeam, Astar, Acala) should flag as higher risk
-- Wrapped/bridged assets (DOT, GLMR, ASTR) may have additional bridge risk
+Critical Risk Factors (+20 to +40):
+- Unverified source code on blockchain: +30 points
+- Unlimited allowance for stablecoins (USDT, USDC, DAI, aUSD): +40 points (CRITICAL)
+- Token is stablecoin with unlimited approval: +35 points
+- DeFi protocol with questionable keeper/guardian: +25 points
+- Suspicious permission escalation pattern: +30 points
+- Proxy pointing to suspicious implementation: +25 points
+
+High Risk Factors (+15 to +20):
+- Contract age < 30 days on new chain: +15 points
+- Upgradeable proxy pattern (UUPS/Transparent): +15 points
+- XCM cross-chain approval to parachain: +18 points
+- Multiple admin functions with no timelock: +16 points
+- Wrapped/bridged asset (DOT, GLMR, ASTR) from unknown bridge: +20 points
+
+Medium Risk Factors (+8 to +14):
+- Approval idle > 90 days: +10 points
+- Emergency pause function with broad effect: +12 points
+- Unusual token decimals (not 18): +8 points
+- Single admin (not multisig): +11 points
+
+Risk Reducers (-10 to -20):
+- Known audited DeFi protocol (Aave, Compound, Uniswap, StellaSwap, Beamswap, ArthSwap): -15 points
+- OpenZeppelin libraries detected: -10 points
+- Contract >90 days with clean history: -12 points
+- Multisig admin setup: -15 points
+- Known institutional backing (Polkadot Foundation, parachains): -20 points
+
+Polkadot Hub Context:
+- Ecosystem is nascent — apply caution with new contracts
+- XCM introduces cross-chain vectors — flag if approval reaches multiple parachains
+- Native asset bridges (DOT, GLMR, ASTR) have bridge trust assumptions
+- Most contracts will be young — normalize for ecosystem age
+
+CONFIDENCE SCORING:
+- Confidence HIGH (90-100%): Contract has verifiable on-chain evidence of all claims
+- Confidence MEDIUM (70-89%): Some chain data available, assumptions on code verification
+- Confidence LOW (50-69%): Limited on-chain evidence, mostly static analysis
+- Confidence VERY_LOW (<50%): Insufficient data, recommend manual review
 
 Return ONLY valid JSON with this exact structure:
 {
   "riskLevel": "SAFE" | "CAUTION" | "DANGER",
   "riskScore": <number 0-100>,
-  "reasons": [<array of specific risk reason strings>],
-  "recommendation": "<one-sentence plain-English recommendation>",
+  "confidence": <number 0-100>,
+  "confidenceLevel": "VERY_LOW" | "LOW" | "MEDIUM" | "HIGH",
+  "reasons": [<array of 3-5 specific risk reason strings with evidence>],
+  "riskFactors": {
+    "critical": [<critical risk items>],
+    "high": [<high risk items>],
+    "medium": [<medium risk items>]
+  },
+  "mitigations": [<array of mitigation strategies if applicable>],
+  "recommendation": "<detailed recommendation 2-3 sentences>",
   "isUpgradeable": <boolean>,
   "isVerified": <boolean>,
   "contractAge": <number in days>,
   "isStablecoin": <boolean>,
   "isDeFiProtocol": <boolean>,
-  "scoredAt": ${Date.now()}
+  "riskTrend": "INCREASING" | "STABLE" | "DECREASING",
+  "aiModel": "Gemini 2.0 Flash",
+  "analysisTimestamp": ${Date.now()}
 }
 
-DANGER = score 60-100, CAUTION = score 30-59, SAFE = score 0-29.
-Be conservative — flag anything suspicious. This protects real user funds on Polkadot Hub.`;
+DANGER = score 60-100 (HIGH RISK - Recommend revocation)
+CAUTION = score 30-59 (MEDIUM RISK - Review and consider limits)
+SAFE = score 0-29 (LOW RISK - Acceptable)
+
+Be conservative and thorough. Every flag protects real user funds on Polkadot Hub.`;
 
     const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
     const result = await model.generateContent(prompt);

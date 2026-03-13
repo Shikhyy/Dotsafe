@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useActiveWalletChain } from 'thirdweb/react';
 import { useDotSafeStore } from '@/store';
 import type { AIRiskScore, ApprovalData } from '@/lib/types';
 
@@ -30,6 +31,7 @@ function setCachedScore(contractAddress: string, score: AIRiskScore) {
 
 export function useAIScoring() {
   const { scanResult, updateApprovalScore, setAppState } = useDotSafeStore();
+  const activeChain = useActiveWalletChain();
 
   const scoreAll = useCallback(async () => {
     if (!scanResult?.approvals.length) {
@@ -53,7 +55,7 @@ export function useAIScoring() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contractAddress: approval.spenderAddress,
-            chainId: 420420421,
+            chainId: activeChain?.id ?? 420420421,
             allowanceAmount: approval.allowanceRaw.toString(),
             approvalAge: Math.floor((Date.now() / 1000) - approval.approvalTimestamp),
             isUnlimited: approval.isUnlimited,
@@ -71,11 +73,16 @@ export function useAIScoring() {
         updateApprovalScore(approval.id, {
           riskLevel: 'CAUTION',
           riskScore: 50,
+          confidence: 40,
+          confidenceLevel: 'LOW',
           reasons: ['Score unavailable — API error'],
-          recommendation: 'Review this approval manually.',
+          mitigations: ['Consider manual review via blockchain explorers'],
+          recommendation: 'Review this approval manually via Subscan or Polkascan. Unable to provide automated analysis at this time.',
           isUpgradeable: false,
           isVerified: false,
           contractAge: 0,
+          riskTrend: 'STABLE',
+          aiModel: 'Gemini 2.0 Flash (Fallback)',
           scoredAt: Date.now(),
         });
       }

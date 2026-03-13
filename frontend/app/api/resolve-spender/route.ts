@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Known contracts database — maps addresses to protocol names
-// This would normally be a database lookup or aggregated from multiple sources
+// Known contracts on Polkadot Asset Hub (mainnet + Westend testnet)
+// Lowercase addresses for fast O(1) lookup
 const KNOWN_CONTRACTS: Record<string, { name: string; protocol: string; auditUrl?: string }> = {
-  // Common DEX routers / protocols — placeholder entries
-  // In production, this would be populated from Blockscout/chain metadata
+  // Polkadot Asset Hub system contracts & wrapped assets
+  '0xffffffff00000000000000010000000000000002': { name: 'Wrapped DOT (wDOT)', protocol: 'Polkadot Asset Hub', auditUrl: 'https://github.com/paritytech/polkadot-sdk' },
+  '0xffffffff000000000000000100000000000007ef': { name: 'USDC (Asset Hub)', protocol: 'Circle / Asset Hub', auditUrl: 'https://developers.circle.com/stablecoins/usdc-on-polkadot' },
+  '0xffffffff00000000000000010000000000000001': { name: 'USDT (Asset Hub)', protocol: 'Tether / Asset Hub' },
+  '0x00000000000000000000000000000000000a0000': { name: 'XCM Precompile', protocol: 'Polkadot Runtime', auditUrl: 'https://github.com/paritytech/polkadot-sdk' },
+  '0x0000000000000000000000000000000000000400': { name: 'EVM Precompile — SHA256', protocol: 'Polkadot Runtime' },
+  '0x0000000000000000000000000000000000000001': { name: 'ECRecover Precompile', protocol: 'EVM Standard' },
+  '0x0000000000000000000000000000000000000002': { name: 'SHA256 Precompile', protocol: 'EVM Standard' },
+  '0x0000000000000000000000000000000000000003': { name: 'RIPEMD160 Precompile', protocol: 'EVM Standard' },
+  '0x0000000000000000000000000000000000000004': { name: 'Identity Precompile', protocol: 'EVM Standard' },
+  '0x0000000000000000000000000000000000000005': { name: 'ModExp Precompile', protocol: 'EVM Standard' },
 };
 
 export async function GET(request: NextRequest) {
@@ -27,31 +36,34 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  // Try to resolve from Blockscout API for Polkadot Hub
+  // Try to resolve via Subscan API for Polkadot Asset Hub
   try {
-    const explorerApi = chainId === '420420420'
-      ? 'https://assethub-westend.subscan.io/api'
-      : 'https://assethub-polkadot.subscan.io/api';
+    const subscanHost = chainId === '420420420'
+      ? 'https://assethub-westend.api.subscan.io'
+      : 'https://assethub-polkadot.api.subscan.io';
 
-    // Attempt Blockscout-compatible smart-contract endpoint
-    const res = await fetch(`${explorerApi}/v2/smart-contracts/${address}`, {
-      headers: { 'Accept': 'application/json' },
+    // Subscan EVM contract info endpoint (POST)
+    const res = await fetch(`${subscanHost}/api/scan/evm/contract`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ address }),
       signal: AbortSignal.timeout(5000),
     });
 
     if (res.ok) {
-      const data = await res.json();
-      if (data?.name) {
+      const json = await res.json() as { code?: number; data?: { contract_name?: string; token_name?: string } };
+      const contractName = json?.data?.contract_name || json?.data?.token_name;
+      if (json?.code === 0 && contractName) {
         return NextResponse.json({
-          name: data.name,
-          protocol: data.name,
+          name: contractName,
+          protocol: contractName,
           isKnown: true,
           auditUrl: null,
         });
       }
     }
   } catch {
-    // Explorer API unavailable — fall through
+    // Subscan API unavailable — fall through
   }
 
   return NextResponse.json({
