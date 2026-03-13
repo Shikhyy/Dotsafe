@@ -55,7 +55,8 @@ async function deployContract(api, signer, name, bytecode) {
       null // salt (null = use account nonce-based derivation)
     );
 
-    tx.signAndSend(signer, ({ status, events, dispatchError }) => {
+    // Use immortal era to avoid "ancient birth block" errors during slow API init
+    tx.signAndSend(signer, { era: 0, blockHash: api.genesisHash }, ({ status, events, dispatchError }) => {
       if (dispatchError) {
         if (dispatchError.isModule) {
           const decoded = api.registry.findMetaError(dispatchError.asModule);
