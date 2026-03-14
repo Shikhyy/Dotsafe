@@ -8,14 +8,13 @@ import { getRpcClient, eth_gasPrice } from 'thirdweb';
 import { useDotSafeStore } from '@/store';
 import { BATCH_REVOKER_ABI, ERC20_ABI, ERC721_ABI, CONTRACT_ADDRESSES } from '@/lib/contracts';
 import { useToast } from '@/components/Toast';
-import { polkadotHub, westendAssetHub } from '@/lib/chains';
+import { polkadotHub } from '@/lib/chains';
 import { addRevocationRecord } from '@/lib/history';
 import { thirdwebClient } from '@/lib/wagmi';
 import type { ApprovalData } from '@/lib/types';
 
 function getExplorerUrl(chainId: number): string {
   if (chainId === polkadotHub.id) return polkadotHub.blockExplorers?.[0]?.url ?? '';
-  if (chainId === westendAssetHub.id) return westendAssetHub.blockExplorers?.[0]?.url ?? '';
   return '';
 }
 
@@ -52,8 +51,8 @@ export function useBatchRevoke() {
         const totalGas = gasPerRevoke * BigInt(selectedApprovals.length);
         const gasPrice = await eth_gasPrice(rpcClient);
         const totalCost = totalGas * gasPrice;
-        // DOT has 10 decimals
-        const costInDot = Number(totalCost) / 10 ** 10;
+        // PAS has 18 decimals
+        const costInDot = Number(totalCost) / 10 ** 18;
         if (!cancelled) {
           setGasEstimate(costInDot < 0.0001 ? '<0.0001' : costInDot.toFixed(4));
         }

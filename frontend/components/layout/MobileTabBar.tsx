@@ -16,18 +16,18 @@ export function MobileTabBar() {
 
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface/95 backdrop-blur-md">
-      <div className="flex items-center justify-around py-2">
+      <div className="flex items-center justify-around py-2.5 pb-[calc(env(safe-area-inset-bottom)+0.6rem)]">
         {navItems.map(({ href, icon: Icon, label }) => {
           const isActive = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-lg text-xs transition-colors ${
+              className={`flex flex-col items-center gap-1 px-4 py-1.5 rounded-lg text-[0.78rem] transition-colors ${
                 isActive ? 'text-accent' : 'text-text-muted'
               }`}
             >
-              <Icon size={20} />
+              <Icon size={21} />
               {label}
             </Link>
           );

@@ -1,14 +1,16 @@
 <div align="center">
 
-# 🛡️ DotSafe
+<img src="frontend/app/icon.svg" width="72" height="72" alt="DotSafe Logo" />
 
-### AI-Powered Wallet Risk Guard for Polkadot Hub
+# DotSafe
+
+### AI-Powered Wallet Risk Guard for Passet Hub
 
 **Scan, score, and revoke risky token approvals — before they drain your wallet.**
 
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.24-363636?logo=solidity)](https://soliditylang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org/)
-[![Polkadot](https://img.shields.io/badge/Polkadot-Hub-E6007A?logo=polkadot)](https://polkadot.com/)
+[![Polkadot](https://img.shields.io/badge/Passet_Hub-420420417-E6007A?logo=polkadot)](https://polkadot.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-2.0_Flash-4285F4?logo=google)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -28,7 +30,7 @@ Every time you interact with a dApp, you grant **token approvals** — permissio
 
 **The risk?** A single exploited or malicious contract can drain your entire balance through a forgotten approval.
 
-DotSafe solves this by giving you **full visibility, AI-powered risk analysis, and one-click batch revocation** across Polkadot Hub and its parachains.
+DotSafe solves this by giving you **full visibility, AI-powered risk analysis, and one-click batch revocation** on **Passet Hub**. It also monitors XCM-connected parachains from one dashboard so you can act before stale approvals become exploitable.
 
 ---
 
@@ -72,8 +74,8 @@ Real-time analytics with an animated risk meter, approval breakdown by danger le
 </td>
 <td>
 
-### 💾 Smart Caching
-AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant API calls and deliver instant results on revisits.
+### 🛡️ Approval Policies
+Set per-token spending limits, time-bounded approval windows, and spender whitelists enforced on-chain through the `ApprovalPolicy` contract.
 
 </td>
 </tr>
@@ -91,21 +93,25 @@ AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant A
 │  └─────┬─────┘  └────┬─────┘  └───────────┘            │
 │        │              │                                  │
 │  ┌─────▼──────────────▼─────┐  ┌─────────────────────┐  │
-│  │    Hooks (Wagmi/Viem)    │  │  /api/score-contract │  │
+│  │   Hooks (Thirdweb SDK)   │  │  /api/score-contract │  │
 │  │  • useApprovalScanner    │  │  (Gemini AI Scoring) │  │
 │  │  • useBatchRevoke        │  └──────────┬──────────┘  │
 │  │  • useXCMGuard           │             │              │
 │  │  • useAIScoring          │      ┌──────▼──────┐      │
-│  └─────────┬────────────────┘      │  Gemini 2.0 │      │
-│            │                       │    Flash     │      │
+│  │  • useApprovalPolicy     │      │  Gemini 2.0 │      │
+│  └─────────┬────────────────┘      │    Flash     │      │
+│            │                       └──────────────┘      │
 └────────────┼───────────────────────┴──────────────┴─────┘
              │
      ┌───────▼───────────────────────────────────────┐
-     │          Polkadot Hub EVM (Chain 420420421)    │
+     │             Passet Hub (420420417)            │
      │  ┌──────────────┐ ┌────────────┐ ┌─────────┐  │
      │  │ Approval     │ │  Batch     │ │  XCM    │  │
      │  │ Scanner      │ │  Revoker   │ │  Guard  │  │
-     │  └──────────────┘ └────────────┘ └────┬────┘  │
+     │  └──────────────┘ └────────────┘ └─────────┘  │
+     │                 ┌───────────────────────────┐ │
+     │                 │      Approval Policy      │ │
+     │                 └───────────────────────────┘ │
      └───────────────────────────────────────┼────────┘
                                              │ XCM
                     ┌────────────────────────┼────────────┐
@@ -129,11 +135,21 @@ AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant A
 | **AI Engine** | Google Gemini 2.0 Flash |
 | **State** | Zustand 5 |
 | **Animations** | Framer Motion |
-| **Chains** | Polkadot Hub · Westend Asset Hub (testnet) |
+| **Fonts** | Syne · Manrope · Space Mono |
+| **Chains** | Passet Hub (Chain ID `420420417`) |
 
 ---
 
 ## 📦 Smart Contracts
+
+### Deployed Addresses
+
+| Contract | Address |
+|----------|---------|
+| `ApprovalScanner` | `0x723BE9931C1417Ef00B7f6f426e387Dc5099E602` |
+| `BatchRevoker` | `0xe136a28958DBd9Ad3A8c942B91e01064f95a1E8f` |
+| `XCMGuard` | `0x78e0C8c7a94122211E07b14562C5d781aDA748dC` |
+| `ApprovalPolicy` | `0x19eDb13a0FA86a89aC7fD14f811769230B3Bf00A` |
 
 ### ApprovalScanner
 
@@ -169,6 +185,18 @@ AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant A
 | `getMonitoredParachains()` | Returns monitored parachain IDs |
 | `isMonitored(paraId)` | Check if a parachain is monitored |
 
+### ApprovalPolicy
+
+> User-configurable spending rules and trusted spender allowlists.
+
+| Function | Description |
+|----------|-------------|
+| `registerWallet()` | Registers a wallet for policy management |
+| `setPolicy(token, maxAllowance, approvalWindow, whitelistOnly)` | Writes a token-specific approval policy |
+| `removePolicy(token)` | Removes a token-specific approval policy |
+| `addWhitelistEntry(spender)` | Adds a spender to the allowlist |
+| `removeWhitelistEntry(spender)` | Removes a spender from the allowlist |
+
 ---
 
 ## 🚀 Getting Started
@@ -177,7 +205,7 @@ AI scores are cached in `localStorage` with a 1-hour TTL to minimize redundant A
 
 - **Node.js** ≥ 18
 - **npm** or **yarn**
-- A wallet with the **Polkadot Hub** network configured (Chain ID: `420420421`)
+- A wallet with **Passet Hub** configured (Chain ID: `420420417`)
 - **Gemini API Key** — Get one at [ai.google.dev](https://ai.google.dev/)
 
 ### 1. Clone the Repository
@@ -199,11 +227,8 @@ npm run compile
 # Run tests
 npm run test
 
-# Deploy to testnet (Westend Asset Hub)
+# Deploy to Passet Hub
 npm run deploy:testnet
-
-# Deploy to mainnet (Polkadot Hub)
-npm run deploy:mainnet
 ```
 
 ### 3. Frontend Setup
@@ -235,15 +260,13 @@ Open **http://localhost:3000** and connect your wallet.
 | `GEMINI_API_KEY` | ✅ | Google Gemini API key for AI risk scoring |
 | `NEXT_PUBLIC_THIRDWEB_CLIENT_ID` | ✅ | ThirdWeb client ID for wallet connection |
 | `DEPLOYER_PRIVATE_KEY` | ✅* | Deployer wallet private key (*for contract deployment only) |
-| `POLKADOT_HUB_RPC` | ❌ | Custom RPC endpoint for Polkadot Hub |
-| `WESTEND_RPC` | ❌ | Custom RPC endpoint for Westend testnet |
+| `POLKADOT_TESTNET_RPC` | ❌ | Custom RPC endpoint for Passet Hub |
 
 ### Supported Networks
 
 | Network | Chain ID | Currency | Explorer |
 |---------|----------|----------|----------|
-| **Polkadot Hub** | 420420421 | DOT (10 decimals) | [Subscan](https://assethub-polkadot.subscan.io) |
-| **Westend Asset Hub** | 420420420 | WND (10 decimals) | [Subscan](https://assethub-westend.subscan.io) |
+| **Passet Hub** | 420420417 | PAS (18 decimals) | [Subscan](https://assethub-paseo.subscan.io) |
 
 ### XCM Monitored Parachains
 
@@ -267,6 +290,7 @@ Test coverage includes:
 - **ApprovalScanner** — Allowance checks, batch operations, at-risk value calculations
 - **BatchRevoker** — Single/batch revocations, event emissions, input validation
 - **XCMGuard** — Parachain monitoring, cross-chain alerts, access control
+- **ApprovalPolicy** — Policy management, whitelist updates, registration flow
 
 ---
 
@@ -310,6 +334,7 @@ DotSafe/
 │   │   ├── ApprovalScanner.sol # On-chain approval verification
 │   │   ├── BatchRevoker.sol    # Atomic batch revocation
 │   │   ├── XCMGuard.sol        # Cross-chain XCM monitoring
+│   │   ├── ApprovalPolicy.sol  # On-chain approval rules
 │   │   └── mocks/              # Test mock contracts
 │   ├── test/                   # Contract test suite
 │   ├── ignition/               # Deployment modules
@@ -320,6 +345,8 @@ DotSafe/
 │   ├── app/                    # App router pages
 │   │   ├── page.tsx            # Landing page
 │   │   ├── dashboard/          # Main scanning dashboard
+│   │   ├── policy/             # Approval policy manager
+│   │   ├── history/            # Revocation history
 │   │   ├── xcm/                # XCM cross-chain monitor
 │   │   └── api/                # AI scoring API route
 │   ├── components/             # React components

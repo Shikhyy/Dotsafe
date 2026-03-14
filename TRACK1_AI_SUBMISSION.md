@@ -174,7 +174,7 @@ DotSafe's AI understands the **unique characteristics of Polkadot Hub**:
 // POST /api/score-contract
 {
   contractAddress: "0x...",
-  chainId: 420420421,           // Polkadot Hub
+        chainId: 420420417,           // Polkadot Hub TestNet (Passet Hub)
   allowanceAmount: "1000000",
   approvalAge: 86400,            // seconds
   isUnlimited: true,

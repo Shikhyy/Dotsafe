@@ -11,10 +11,10 @@ export default function XCMPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <Globe size={18} className="text-accent" />
-          <h2 className="text-sm font-semibold text-text">XCM Cross-Chain Guard</h2>
+          <h2 className="text-base font-semibold text-text">XCM Cross-Chain Guard</h2>
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -40,7 +40,7 @@ export default function XCMPage() {
         </div>
       </header>
 
-      <div className="p-4 md:p-6 max-w-4xl">
+      <div className="p-4 md:p-7 max-w-6xl">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-text mb-1">Monitored Parachains</h3>
           <p className="text-sm text-text-muted">

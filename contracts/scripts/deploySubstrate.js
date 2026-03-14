@@ -42,7 +42,9 @@ async function deployContract(api, signer, name, bytecode) {
   const codeBytes = hexToU8a(bytecode);
   const WEIGHT_REF_TIME = 50_000_000_000n;
   const WEIGHT_PROOF_SIZE = 5_000_000n;
-  const STORAGE_DEPOSIT_LIMIT = null; // let runtime calculate
+  // Westend Asset Hub expects a compact balance here, not Option<Balance>.
+  // Passing null is interpreted as 0 and can cause storage deposit failures.
+  const STORAGE_DEPOSIT_LIMIT = 10_000_000_000_000n;
 
   const tx = api.tx.revive.instantiateWithCode(
     0, // value (no native token transfer)
@@ -66,6 +68,17 @@ async function deployContract(api, signer, name, bytecode) {
         if (dispatchError) {
           if (dispatchError.isModule) {
             const decoded = api.registry.findMetaError(dispatchError.asModule);
+            if (decoded.section === "revive" && decoded.name === "StackUnderflow") {
+              reject(
+                new Error(
+                  `${name} deploy failed: ${decoded.section}.${decoded.name}: ${decoded.docs}\n` +
+                    "This indicates the runtime rejected constructor bytecode execution.\n" +
+                    "Try deploying via a private Westend ETH RPC endpoint (public endpoint often bans sends),\n" +
+                    "or recompile with the official hardhat-polkadot defaults and retry."
+                )
+              );
+              return;
+            }
             reject(new Error(`${name} deploy failed: ${decoded.section}.${decoded.name}: ${decoded.docs}`));
           } else {
             reject(new Error(`${name} deploy failed: ${dispatchError.toString()}`));
@@ -161,13 +174,23 @@ Usage:
       { nonce: nonce0, era: immortalEra, blockHash: api.genesisHash },
       ({ status, events, dispatchError }) => {
         if (dispatchError) {
-          // AccountAlreadyMapped is fine — just means it was already done
-          const errStr = dispatchError.toString();
-          if (errStr.includes("AlreadyMapped") || errStr.includes("AccountAlreadyMapped")) {
-            console.log("  ℹ️  Account already mapped, continuing...");
-            resolve();
+          // AccountAlreadyMapped is fine - just means it was already done.
+          if (dispatchError.isModule) {
+            const decoded = api.registry.findMetaError(dispatchError.asModule);
+            if (decoded.section === "revive" && decoded.name === "AccountAlreadyMapped") {
+              console.log("  ℹ️  Account already mapped, continuing...");
+              resolve();
+              return;
+            }
+            reject(new Error(`mapAccount failed: ${decoded.section}.${decoded.name}: ${decoded.docs}`));
           } else {
-            reject(new Error(`mapAccount failed: ${errStr}`));
+            const errStr = dispatchError.toString();
+            if (errStr.includes("AlreadyMapped") || errStr.includes("AccountAlreadyMapped")) {
+              console.log("  ℹ️  Account already mapped, continuing...");
+              resolve();
+            } else {
+              reject(new Error(`mapAccount failed: ${errStr}`));
+            }
           }
           return;
         }

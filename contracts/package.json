@@ -4,9 +4,9 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy:testnet": "hardhat ignition deploy ignition/modules/DotSafe.ts --network westendAssetHub",
+    "deploy:testnet": "hardhat run scripts/deploy.ts --network polkadotTestnet",
     "deploy:mainnet": "hardhat ignition deploy ignition/modules/DotSafe.ts --network polkadotHub",
-    "seed:testnet": "hardhat run scripts/seedDemo.ts --network westendAssetHub",
+    "seed:testnet": "hardhat run scripts/seedDemo.ts --network polkadotTestnet",
     "seed:mainnet": "hardhat run scripts/seedDemo.ts --network polkadotHub"
   },
   "license": "MIT",
