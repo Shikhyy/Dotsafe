@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex w-[250px] lg:w-[270px] flex-shrink-0 border-r border-border bg-surface p-5 lg:p-6 flex-col gap-7 sticky top-0 h-screen">
+    <aside className="glass-sidebar hidden md:flex w-[250px] lg:w-[270px] flex-shrink-0 p-5 lg:p-6 flex-col gap-7 sticky top-0 h-screen rounded-none border-y-0 border-l-0">
       <Link href="/" className="flex items-center gap-2.5 mb-2">
         <Shield size={24} className="text-accent" />
         <span className="text-xl font-extrabold tracking-tight">
@@ -31,10 +31,10 @@ export function Sidebar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-[0.95rem] transition-colors ${
+              className={`glass-nav-link flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-[0.95rem] transition-all ${
                 isActive
-                  ? 'bg-surface-2 text-text'
-                  : 'text-text-muted hover:text-text hover:bg-surface-2'
+                  ? 'glass-nav-link-active text-text'
+                  : 'text-text-muted hover:text-text'
               }`}
             >
               <Icon size={17} />

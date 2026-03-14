@@ -41,20 +41,20 @@ function ConnectedWallet() {
     <div ref={ref} style={{ position: 'relative' }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-2 border border-border text-sm text-text hover:border-accent transition-colors font-mono"
+        className="glass-chip flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-text hover:border-accent transition-colors font-mono"
       >
         <span className="w-2 h-2 rounded-full bg-green inline-block flex-shrink-0" />
         {short}
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-60 rounded-xl border border-border bg-surface shadow-2xl z-50 overflow-hidden">
+        <div className="glass-panel absolute right-0 top-full mt-2 w-60 rounded-xl z-50 overflow-hidden">
           {/* Address row — copy is a sibling button, NOT nested */}
           <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
             <span className="font-mono text-xs text-text truncate flex-1">{short}</span>
             <button
               onClick={copyAddress}
-              className="p-1.5 rounded text-text-muted hover:text-text hover:bg-surface-2 transition-colors flex-shrink-0"
+              className="p-1.5 rounded text-text-muted hover:text-text hover:bg-white/5 transition-colors flex-shrink-0"
               title="Copy address"
             >
               {copied ? <Check size={13} className="text-green" /> : <Copy size={13} />}
@@ -70,7 +70,7 @@ function ConnectedWallet() {
           {/* Disconnect */}
           <button
             onClick={() => { disconnect(wallet!); setOpen(false); }}
-            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red hover:bg-surface-2 transition-colors"
+            className="w-full flex items-center gap-2 px-4 py-3 text-sm text-red hover:bg-white/5 transition-colors"
           >
             <LogOut size={14} />
             Disconnect
@@ -104,6 +104,16 @@ export function WalletConnect() {
       connectButton={{
         label: 'Connect Wallet',
         className: 'dotsafe-connect-btn',
+        style: {
+          background: 'linear-gradient(135deg, #E8175D 0%, #B81250 48%, #7D113D 100%)',
+          color: '#ffffff',
+          border: '1px solid rgba(232, 23, 93, 0.55)',
+          borderRadius: '12px',
+          padding: '12px 30px',
+          minWidth: '180px',
+          boxShadow: '0 10px 30px rgba(232, 23, 93, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08)',
+          fontWeight: '600',
+        },
       }}
       theme="dark"
       connectModal={{

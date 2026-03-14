@@ -49,7 +49,7 @@ export function RiskMeter() {
   const C = 276.46;
 
   return (
-    <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
+    <div className="glass-panel rounded-2xl p-4 space-y-4">
 
       {/* ── hero ring ── */}
       <div className="flex flex-col items-center">
@@ -86,7 +86,7 @@ export function RiskMeter() {
             <AnimatedNumber value={avgConfidence} />%
           </span>
         </div>
-        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: '#1A2530' }}>
+        <div className="glass-chip h-2 w-full rounded-full overflow-hidden" style={{ background: 'rgba(20, 29, 39, 0.86)' }}>
           <motion.div
             className="h-full rounded-full"
             style={{ backgroundColor: confHex }}
@@ -100,19 +100,19 @@ export function RiskMeter() {
 
       {/* ── stat rows ── */}
       <div className="space-y-1">
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-red/20 bg-red/5">
+        <div className="glass-chip flex items-center justify-between px-2.5 py-1.5 rounded-lg border-red/20 bg-red/5">
           <span className="flex items-center gap-2 text-sm text-red">
             <AlertCircle size={13} /> Danger
           </span>
           <span className="font-mono text-sm font-bold text-text">{dangerCount}</span>
         </div>
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-yellow/20 bg-yellow/5">
+        <div className="glass-chip flex items-center justify-between px-2.5 py-1.5 rounded-lg border-yellow/20 bg-yellow/5">
           <span className="flex items-center gap-2 text-sm text-yellow">
             <AlertTriangle size={13} /> Caution
           </span>
           <span className="font-mono text-sm font-bold text-text">{cautionCount}</span>
         </div>
-        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-green/20 bg-green/5">
+        <div className="glass-chip flex items-center justify-between px-2.5 py-1.5 rounded-lg border-green/20 bg-green/5">
           <span className="flex items-center gap-2 text-sm text-green">
             <CheckCircle2 size={13} /> Safe
           </span>
@@ -128,7 +128,7 @@ export function RiskMeter() {
 
       {/* ── AI badge (only after scan) ── */}
       {scanResult?.approvals && scanResult.approvals.length > 0 && (
-        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg border border-accent/20 bg-accent/8">
+        <div className="glass-chip flex items-center gap-1.5 px-2 py-1.5 rounded-lg border-accent/20 bg-accent/8">
           <Zap size={11} className="text-accent" />
           <span className="text-[0.6rem] font-semibold text-accent">Gemini 2.0 Flash</span>
         </div>
