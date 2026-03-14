@@ -27,7 +27,7 @@ export default function HistoryPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="glass-header sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5">
         <div className="flex items-center gap-3">
           <h2 className="text-base font-semibold text-text">Revocation History</h2>
           <span className="text-xs text-text-dim">{records.length} record{records.length !== 1 ? 's' : ''}</span>
@@ -36,8 +36,8 @@ export default function HistoryPage() {
           {records.length > 0 && (
             <button
               onClick={handleClear}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border-2 text-text-muted
-                         rounded-lg hover:bg-surface-2 transition-colors cursor-pointer"
+              className="glass-chip flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted
+                         rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
             >
               <Trash2 size={12} />
               Clear History

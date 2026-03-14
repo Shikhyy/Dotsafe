@@ -75,7 +75,7 @@ export default function PolicyPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="glass-header sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5">
         <div className="flex items-center gap-3">
           <FileCheck size={18} className="text-accent" />
           <h2 className="text-base font-semibold text-text">Approval Policies</h2>

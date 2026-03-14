@@ -11,7 +11,7 @@ export default function XCMPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="glass-header sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5">
         <div className="flex items-center gap-3">
           <Globe size={18} className="text-accent" />
           <h2 className="text-base font-semibold text-text">XCM Cross-Chain Guard</h2>
@@ -20,7 +20,7 @@ export default function XCMPage() {
           <button
             onClick={scanAllParachains}
             disabled={scanning}
-            className="flex items-center gap-1.5 px-4 py-1.5 text-xs bg-accent text-white
+            className="glass-chip flex items-center gap-1.5 px-4 py-1.5 text-xs bg-accent text-white
                        rounded-lg shadow-[0_0_20px_rgba(232,23,93,0.25)] hover:shadow-[0_0_30px_rgba(232,23,93,0.4)]
                        transition-all duration-200 disabled:opacity-50 cursor-pointer"
           >

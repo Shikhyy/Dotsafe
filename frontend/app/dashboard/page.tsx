@@ -65,19 +65,19 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="glass-header sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5">
         <div className="flex items-center gap-3">
           <h2 className="text-base font-semibold text-text">Approval Scanner</h2>
           {address && (
             <div className="hidden lg:flex items-center gap-2 text-xs text-text-muted">
               <span className="font-mono">{truncateAddress(address)}</span>
               {balanceData && (
-                <span className="px-1.5 py-0.5 bg-surface-2 rounded text-text-dim">
+                <span className="glass-chip px-1.5 py-0.5 rounded text-text-dim">
                   {Number(balanceData.displayValue).toFixed(2)} {balanceData.symbol}
                 </span>
               )}
               {scanResult && (
-                <span className={`px-1.5 py-0.5 rounded font-mono ${
+                <span className={`glass-chip px-1.5 py-0.5 rounded font-mono ${
                   overallRisk >= 60 ? 'bg-red/10 text-red' : overallRisk >= 30 ? 'bg-yellow/10 text-yellow' : 'bg-green/10 text-green'
                 }`}>
                   Risk: {overallRisk}
@@ -91,8 +91,8 @@ export default function DashboardPage() {
             <button
               onClick={() => scan(address)}
               disabled={isScanning}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-border-2 text-text-muted
-                         rounded-lg hover:bg-surface-2 transition-colors disabled:opacity-50 cursor-pointer"
+              className="glass-chip flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-muted
+                         rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw size={12} className={isScanning ? 'animate-spin' : ''} />
               {isScanning ? 'Scanning...' : 'Rescan'}
@@ -119,7 +119,7 @@ export default function DashboardPage() {
 
         {/* Error banner */}
         {error && (
-          <div className="mb-4 p-3 bg-red/10 border border-red/30 rounded-lg text-sm text-red">
+          <div className="glass-chip mb-4 p-3 rounded-lg text-sm text-red border-red/30 bg-red/10">
             {error}
           </div>
         )}
@@ -129,14 +129,14 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-7">
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}
-              className="p-3.5 bg-surface border border-border rounded-xl border-t-2 border-t-accent"
+              className="glass-panel p-3.5 rounded-xl border-t-2 border-t-accent"
             >
               <div className="text-xs text-text-muted mb-1">Total Approvals</div>
               <div className="text-2xl font-mono font-bold text-text">{approvals.length}</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-              className="p-3.5 bg-surface border border-red/20 rounded-xl border-t-2 border-t-red"
+              className="glass-panel p-3.5 rounded-xl border-red/20 border-t-2 border-t-red"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <AlertCircle size={10} className="text-red" /> Danger
@@ -145,7 +145,7 @@ export default function DashboardPage() {
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="p-3.5 bg-surface border border-yellow/20 rounded-xl border-t-2 border-t-yellow"
+              className="glass-panel p-3.5 rounded-xl border-yellow/20 border-t-2 border-t-yellow"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <AlertTriangle size={10} className="text-yellow" /> Caution
@@ -154,7 +154,7 @@ export default function DashboardPage() {
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="p-3.5 bg-surface border border-green/20 rounded-xl border-t-2 border-t-green"
+              className="glass-panel p-3.5 rounded-xl border-green/20 border-t-2 border-t-green"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <CheckCircle2 size={10} className="text-green" /> Safe
@@ -169,7 +169,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3 mb-4">
             <button
               onClick={selectAllDanger}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red/10 border border-red/30 text-red
+              className="glass-chip flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red/10 border-red/30 text-red
                          rounded-lg hover:bg-red/20 transition-colors cursor-pointer"
             >
               <AlertCircle size={12} />
@@ -209,7 +209,7 @@ export default function DashboardPage() {
             <p className="text-sm text-text-muted mb-6">No active approvals found. You&apos;re safe.</p>
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-green/30 text-green rounded-lg
+              className="glass-chip flex items-center gap-2 px-4 py-2 text-sm border-green/30 text-green rounded-lg
                          hover:bg-green/10 transition-colors cursor-pointer"
             >
               <Share2 size={14} />
@@ -236,7 +236,7 @@ export default function DashboardPage() {
           <div className="mt-6 flex justify-center">
             <button
               onClick={handleShare}
-              className="flex items-center gap-2 px-4 py-2 text-sm border border-green/30 text-green rounded-lg
+              className="glass-chip flex items-center gap-2 px-4 py-2 text-sm border-green/30 text-green rounded-lg
                          hover:bg-green/10 transition-colors cursor-pointer"
             >
               <Share2 size={14} />
