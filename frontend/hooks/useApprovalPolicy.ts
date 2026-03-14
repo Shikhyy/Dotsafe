@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useActiveAccount, useActiveWalletChain, useSendTransaction } from 'thirdweb/react';
 import { getContract, getRpcClient, eth_getLogs, prepareContractCall, readContract } from 'thirdweb';
 import { CONTRACT_ADDRESSES, APPROVAL_POLICY_ABI, ZERO_ADDRESS } from '@/lib/contracts';
-import { polkadotHub, westendAssetHub } from '@/lib/chains';
+import { polkadotHub } from '@/lib/chains';
 import { thirdwebClient } from '@/lib/wagmi';
 import { useToast } from '@/components/Toast';
 
@@ -27,7 +27,6 @@ const POLICY_REMOVED_TOPIC = '0xe0df14cb7b363e735f6c1ec170d3177c206aec534d306bd8
 
 function getExplorerUrl(chainId: number): string {
   if (chainId === polkadotHub.id) return polkadotHub.blockExplorers?.[0]?.url ?? '';
-  if (chainId === westendAssetHub.id) return westendAssetHub.blockExplorers?.[0]?.url ?? '';
   return '';
 }
 

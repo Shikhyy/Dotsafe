@@ -3,144 +3,134 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useDotSafeStore } from '@/store';
-import { Shield, AlertTriangle, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
+import { AlertTriangle, AlertCircle, CheckCircle2, Zap } from 'lucide-react';
 
-function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+function AnimatedNumber({ value }: { value: number }) {
   const [display, setDisplay] = useState(0);
   const frameRef = useRef<number>(0);
 
   useEffect(() => {
     const start = performance.now();
     const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / 800, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setDisplay(Math.round(eased * value));
-      if (progress < 1) frameRef.current = requestAnimationFrame(animate);
+      const p = Math.min((now - start) / 800, 1);
+      setDisplay(Math.round((1 - Math.pow(1 - p, 3)) * value));
+      if (p < 1) frameRef.current = requestAnimationFrame(animate);
     };
     frameRef.current = requestAnimationFrame(animate);
     return () => { if (frameRef.current) cancelAnimationFrame(frameRef.current); };
   }, [value]);
 
-  return <span className={className}>{display}</span>;
+  return <>{display}</>;
 }
 
 export function RiskMeter() {
   const { scanResult } = useDotSafeStore();
 
-  const score = scanResult?.overallRiskScore ?? 0;
-  const dangerCount = scanResult?.dangerCount ?? 0;
+  const score        = scanResult?.overallRiskScore ?? 0;
+  const dangerCount  = scanResult?.dangerCount  ?? 0;
   const cautionCount = scanResult?.cautionCount ?? 0;
-  const safeCount = scanResult?.safeCount ?? 0;
-  const total = dangerCount + cautionCount + safeCount;
-  
-  // Calculate average AI confidence from all scores
-  const aiScores = scanResult?.approvals?.map(a => a.aiScore?.confidence ?? 0) ?? [];
-  const avgConfidence = aiScores.length > 0 ? Math.round(aiScores.reduce((a, b) => a + b, 0) / aiScores.length) : 0;
+  const safeCount    = scanResult?.safeCount    ?? 0;
+  const total        = dangerCount + cautionCount + safeCount;
 
-  const riskColor = score >= 60 ? 'text-red' : score >= 30 ? 'text-yellow' : 'text-green';
-  const riskLabel = score >= 60 ? 'High Risk' : score >= 30 ? 'Moderate' : 'Low Risk';
+  const aiScores      = scanResult?.approvals?.map(a => a.aiScore?.confidence ?? 0) ?? [];
+  const avgConfidence = aiScores.length > 0
+    ? Math.round(aiScores.reduce((a, b) => a + b, 0) / aiScores.length)
+    : 0;
 
-  const confidenceColor = avgConfidence >= 80 ? 'text-green' : avgConfidence >= 60 ? 'text-yellow' : 'text-yellow';
+  const riskHex   = score >= 60 ? '#FF3B5C' : score >= 30 ? '#F5C518' : '#00E5A0';
+  const riskClass = score >= 60 ? 'text-red'  : score >= 30 ? 'text-yellow' : 'text-green';
+  const riskLabel = score >= 60 ? 'High Risk' : score >= 30 ? 'Moderate'    : 'Low Risk';
+
+  const confHex   = avgConfidence >= 80 ? '#00E5A0' : avgConfidence >= 60 ? '#F5C518' : '#FF3B5C';
+  const confClass = avgConfidence >= 80 ? 'text-green' : avgConfidence >= 60 ? 'text-yellow' : 'text-red';
+  const confLabel = avgConfidence >= 80 ? 'High' : avgConfidence >= 60 ? 'Solid' : 'Review';
+
+  // r=44 → circumference = 2π×44 ≈ 276.46
+  const C = 276.46;
 
   return (
-    <div className="p-4 bg-surface border border-border rounded-xl space-y-4">
-      {/* Grid: Overall score + AI Confidence */}
-      <div className="grid grid-cols-2 gap-3">
-        {/* Overall score */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Shield size={14} className="text-accent" />
-            <span className="text-[10px] text-text-muted uppercase tracking-wider">Risk Score</span>
-          </div>
-          <div className="flex items-center justify-center relative w-full" style={{ aspectRatio: '1' }}>
-            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
-              <div className="absolute inset-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="40" fill="none" stroke="currentColor" strokeWidth="6" className="text-border" />
-                  <motion.circle
-                    cx="48" cy="48" r="40" fill="none" strokeWidth="6" strokeLinecap="round"
-                    className={riskColor}
-                    initial={{ strokeDasharray: '0 251.3' }}
-                    animate={{ strokeDasharray: `${(score / 100) * 251.3} 251.3` }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`font-mono text-lg font-bold ${riskColor}`}><AnimatedNumber value={score} /></span>
-                  <span className="text-[8px] text-text-muted">{riskLabel}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="rounded-xl border border-border bg-surface p-4 space-y-4">
 
-        {/* AI Confidence */}
-        <div>
-          <div className="flex items-center gap-2 mb-2">
-            <Zap size={14} className="text-accent" />
-            <span className="text-[10px] text-text-muted uppercase tracking-wider">AI Confidence</span>
-          </div>
-          <div className="flex items-center justify-center relative w-full" style={{ aspectRatio: '1' }}>
-            <div className="relative w-full" style={{ paddingBottom: '100%' }}>
-              <div className="absolute inset-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 96 96">
-                  <circle cx="48" cy="48" r="40" fill="none" stroke="currentColor" strokeWidth="6" className="text-border" />
-                  <motion.circle
-                    cx="48" cy="48" r="40" fill="none" strokeWidth="6" strokeLinecap="round"
-                    className={confidenceColor}
-                    initial={{ strokeDasharray: '0 251.3' }}
-                    animate={{ strokeDasharray: `${(avgConfidence / 100) * 251.3} 251.3` }}
-                    transition={{ duration: 0.8, ease: 'easeOut' }}
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`font-mono text-lg font-bold ${confidenceColor}`}><AnimatedNumber value={avgConfidence} />%</span>
-                  <span className="text-[8px] text-text-muted">
-                    {avgConfidence >= 80 ? 'High' : avgConfidence >= 60 ? 'Good' : 'Review'}
-                  </span>
-                </div>
-              </div>
-            </div>
+      {/* ── hero ring ── */}
+      <div className="flex flex-col items-center">
+        <p className="self-start text-[0.6rem] uppercase tracking-[0.2em] text-text-muted mb-3">Risk Score</p>
+        <div className="relative w-[100px] h-[100px]">
+          <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="#1A2530" strokeWidth="8" />
+            <motion.circle
+              cx="50" cy="50" r="44"
+              fill="none" strokeWidth="8" strokeLinecap="round"
+              stroke={riskHex}
+              initial={{ strokeDasharray: `0 ${C}` }}
+              animate={{ strokeDasharray: `${(score / 100) * C} ${C}` }}
+              transition={{ duration: 0.9, ease: 'easeOut' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className={`font-mono text-2xl font-bold leading-none ${riskClass}`}>
+              <AnimatedNumber value={score} />
+            </span>
+            <span className="text-[0.58rem] text-text-muted mt-0.5 tracking-wide">{riskLabel}</span>
           </div>
         </div>
       </div>
 
-      {/* Breakdown */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1.5 text-red">
-            <AlertCircle size={12} /> Danger
+      {/* ── confidence bar ── */}
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <Zap size={11} className="text-accent" />
+            <span className="text-[0.6rem] uppercase tracking-[0.18em] text-text-muted">AI Confidence</span>
+          </div>
+          <span className={`font-mono text-xs font-semibold ${confClass}`}>
+            <AnimatedNumber value={avgConfidence} />%
           </span>
-          <span className="font-mono text-text">{dangerCount}</span>
         </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1.5 text-yellow">
-            <AlertTriangle size={12} /> Caution
-          </span>
-          <span className="font-mono text-text">{cautionCount}</span>
+        <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: '#1A2530' }}>
+          <motion.div
+            className="h-full rounded-full"
+            style={{ backgroundColor: confHex }}
+            initial={{ width: '0%' }}
+            animate={{ width: `${avgConfidence}%` }}
+            transition={{ duration: 0.9, ease: 'easeOut' }}
+          />
         </div>
-        <div className="flex items-center justify-between text-xs">
-          <span className="flex items-center gap-1.5 text-green">
-            <CheckCircle2 size={12} /> Safe
+        <p className={`text-right text-[0.58rem] ${confClass}`}>{confLabel}</p>
+      </div>
+
+      {/* ── stat rows ── */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-red/20 bg-red/5">
+          <span className="flex items-center gap-2 text-sm text-red">
+            <AlertCircle size={13} /> Danger
           </span>
-          <span className="font-mono text-text">{safeCount}</span>
+          <span className="font-mono text-sm font-bold text-text">{dangerCount}</span>
+        </div>
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-yellow/20 bg-yellow/5">
+          <span className="flex items-center gap-2 text-sm text-yellow">
+            <AlertTriangle size={13} /> Caution
+          </span>
+          <span className="font-mono text-sm font-bold text-text">{cautionCount}</span>
+        </div>
+        <div className="flex items-center justify-between px-2.5 py-1.5 rounded-lg border border-green/20 bg-green/5">
+          <span className="flex items-center gap-2 text-sm text-green">
+            <CheckCircle2 size={13} /> Safe
+          </span>
+          <span className="font-mono text-sm font-bold text-text">{safeCount}</span>
         </div>
       </div>
 
-      {/* Total */}
-      <div className="pt-2 border-t border-border flex items-center justify-between text-xs text-text-muted">
-        <span>Total Approvals</span>
-        <span className="font-mono text-text">{total}</span>
+      {/* ── total ── */}
+      <div className="border-t border-border/60 pt-3 flex items-center justify-between">
+        <span className="text-sm text-text-muted">Total Approvals</span>
+        <span className="font-mono text-sm font-bold text-text">{total}</span>
       </div>
 
-      {/* AI Badge */}
+      {/* ── AI badge (only after scan) ── */}
       {scanResult?.approvals && scanResult.approvals.length > 0 && (
-        <div className="pt-2 border-t border-border">
-          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent/10 border border-accent/20 text-[10px]">
-            <Zap size={10} className="text-accent" />
-            <span className="text-accent font-semibold">Powered by Gemini 2.0 Flash</span>
-          </div>
+        <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg border border-accent/20 bg-accent/8">
+          <Zap size={11} className="text-accent" />
+          <span className="text-[0.6rem] font-semibold text-accent">Gemini 2.0 Flash</span>
         </div>
       )}
     </div>

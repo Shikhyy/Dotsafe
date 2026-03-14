@@ -65,11 +65,11 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       {/* Top bar */}
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-text">Approval Scanner</h2>
+          <h2 className="text-base font-semibold text-text">Approval Scanner</h2>
           {address && (
-            <div className="hidden md:flex items-center gap-2 text-xs text-text-muted">
+            <div className="hidden lg:flex items-center gap-2 text-xs text-text-muted">
               <span className="font-mono">{truncateAddress(address)}</span>
               {balanceData && (
                 <span className="px-1.5 py-0.5 bg-surface-2 rounded text-text-dim">
@@ -103,7 +103,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Content */}
-      <div className="p-4 md:p-6 max-w-4xl">
+      <div className="p-4 md:p-7 max-w-6xl">
         {/* Wrong network banner */}
         {appState === 'WRONG_NETWORK' && (
           <div className="mb-4 p-4 bg-yellow/10 border border-yellow/30 rounded-lg flex items-center gap-3">
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             <div className="flex-1">
               <p className="text-sm font-semibold text-text">Wrong Network</p>
               <p className="text-xs text-text-muted">
-                Please switch to <strong>Polkadot Hub</strong> (Chain ID: 420420421) to use DotSafe.
+                Please switch to <strong>{polkadotHub.name}</strong> (Chain ID: {polkadotHub.id}) to use DotSafe.
               </p>
             </div>
           </div>
@@ -126,40 +126,40 @@ export default function DashboardPage() {
 
         {/* Risk summary stats */}
         {scanResult && !isScanning && approvals.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 mb-7">
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }}
-              className="p-3 bg-surface border border-border rounded-xl border-t-2 border-t-accent"
+              className="p-3.5 bg-surface border border-border rounded-xl border-t-2 border-t-accent"
             >
               <div className="text-xs text-text-muted mb-1">Total Approvals</div>
-              <div className="text-xl font-mono font-bold text-text">{approvals.length}</div>
+              <div className="text-2xl font-mono font-bold text-text">{approvals.length}</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-              className="p-3 bg-surface border border-red/20 rounded-xl border-t-2 border-t-red"
+              className="p-3.5 bg-surface border border-red/20 rounded-xl border-t-2 border-t-red"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <AlertCircle size={10} className="text-red" /> Danger
               </div>
-              <div className="text-xl font-mono font-bold text-red">{dangerCount}</div>
+              <div className="text-2xl font-mono font-bold text-red">{dangerCount}</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-              className="p-3 bg-surface border border-yellow/20 rounded-xl border-t-2 border-t-yellow"
+              className="p-3.5 bg-surface border border-yellow/20 rounded-xl border-t-2 border-t-yellow"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <AlertTriangle size={10} className="text-yellow" /> Caution
               </div>
-              <div className="text-xl font-mono font-bold text-yellow">{cautionCount}</div>
+              <div className="text-2xl font-mono font-bold text-yellow">{cautionCount}</div>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-              className="p-3 bg-surface border border-green/20 rounded-xl border-t-2 border-t-green"
+              className="p-3.5 bg-surface border border-green/20 rounded-xl border-t-2 border-t-green"
             >
               <div className="flex items-center gap-1 text-xs text-text-muted mb-1">
                 <CheckCircle2 size={10} className="text-green" /> Safe
               </div>
-              <div className="text-xl font-mono font-bold text-green">{safeCount}</div>
+              <div className="text-2xl font-mono font-bold text-green">{safeCount}</div>
             </motion.div>
           </div>
         )}

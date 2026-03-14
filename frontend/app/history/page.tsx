@@ -6,11 +6,10 @@ import { WalletConnect } from '@/components/wallet/WalletConnect';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { getRevocationHistory, clearRevocationHistory, type RevocationRecord } from '@/lib/history';
 import { truncateAddress } from '@/lib/scanner';
-import { polkadotHub, westendAssetHub } from '@/lib/chains';
+import { polkadotHub } from '@/lib/chains';
 
 function getExplorerUrl(chainId: number): string {
   if (chainId === polkadotHub.id) return polkadotHub.blockExplorers?.[0]?.url ?? '';
-  if (chainId === westendAssetHub.id) return westendAssetHub.blockExplorers?.[0]?.url ?? '';
   return '';
 }
 
@@ -28,9 +27,9 @@ export default function HistoryPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-text">Revocation History</h2>
+          <h2 className="text-base font-semibold text-text">Revocation History</h2>
           <span className="text-xs text-text-dim">{records.length} record{records.length !== 1 ? 's' : ''}</span>
         </div>
         <div className="flex items-center gap-3">
@@ -48,7 +47,7 @@ export default function HistoryPage() {
         </div>
       </header>
 
-      <div className="p-4 md:p-6 max-w-4xl">
+      <div className="p-4 md:p-7 max-w-6xl">
         {records.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <History size={48} className="text-text-dim mb-4" />

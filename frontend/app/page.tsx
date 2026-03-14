@@ -59,16 +59,16 @@ export default function LandingPage() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(232,23,93,0.08)_0%,transparent_70%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(0,229,160,0.04)_0%,transparent_50%)]" />
 
-      <main className="relative z-10 flex flex-col items-center text-center px-6 max-w-3xl">
+      <main className="relative z-10 flex flex-col items-center text-center px-6 py-10 md:py-14 max-w-4xl">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="flex items-center gap-3 mb-6"
+          className="flex items-center gap-3 mb-7"
         >
-          <Shield size={44} className="text-accent" />
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight">
+          <Shield size={48} className="text-accent" />
+          <h1 className="text-[2.5rem] leading-none md:text-[3.4rem] font-extrabold tracking-tight">
             Dot<span className="text-accent">Safe</span>
           </h1>
         </motion.div>
@@ -78,7 +78,7 @@ export default function LandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
-          className="text-lg md:text-xl text-text-muted mb-2"
+          className="text-xl md:text-2xl text-text-muted mb-2"
         >
           AI-Powered Wallet Risk Guard
         </motion.p>
@@ -86,7 +86,7 @@ export default function LandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.6 }}
-          className="text-sm text-text-dim mb-10 max-w-lg"
+          className="text-[0.98rem] md:text-lg text-text-dim mb-12 max-w-2xl leading-relaxed"
         >
           Scan all your token approvals on Polkadot Hub. AI scores every risk.
           Revoke dangerous permissions in a single transaction — across parachains via XCM.
@@ -106,7 +106,7 @@ export default function LandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.6 }}
-          className="flex flex-wrap justify-center gap-3 mt-12"
+          className="flex flex-wrap justify-center gap-3.5 mt-14"
         >
           {[
             { icon: Scan, text: 'Instant Approval Scan' },
@@ -116,10 +116,10 @@ export default function LandingPage() {
           ].map(({ icon: Icon, text }) => (
             <div
               key={text}
-              className="flex items-center gap-2 px-4 py-2 bg-surface border border-border rounded-full text-xs text-text-muted
+              className="flex items-center gap-2 px-4.5 py-2.5 bg-surface border border-border rounded-full text-[0.8rem] text-text-muted
                          hover:border-border-2 hover:text-text transition-colors"
             >
-              <Icon size={13} className="text-accent" />
+              <Icon size={14} className="text-accent" />
               {text}
             </div>
           ))}
@@ -130,7 +130,7 @@ export default function LandingPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.6 }}
-          className="grid grid-cols-3 gap-6 md:gap-10 mt-16"
+          className="grid grid-cols-3 gap-7 md:gap-14 mt-18"
         >
           <div className="text-center">
             <AnimatedCounter end={100000} suffix="+" />
@@ -151,9 +151,9 @@ export default function LandingPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1, duration: 0.6 }}
-          className="mt-16 flex flex-col items-center gap-2"
+          className="mt-18 flex flex-col items-center gap-2.5"
         >
-          <div className="flex items-center gap-3 text-xs text-text-dim">
+          <div className="flex items-center gap-3 text-[0.78rem] text-text-dim">
             <span className="flex items-center gap-1">
               <Shield size={10} className="text-green" />
               Non-custodial
@@ -166,7 +166,7 @@ export default function LandingPage() {
             <span className="text-border">·</span>
             <span>Open Source · MIT</span>
           </div>
-          <p className="text-[11px] text-text-dim/50 max-w-sm">
+          <p className="text-xs text-text-dim/50 max-w-sm">
             First-mover approval security infrastructure for Polkadot Hub EVM.
           </p>
         </motion.div>

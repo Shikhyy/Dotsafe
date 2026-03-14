@@ -13,22 +13,35 @@
   --color-text: #E8EDF2;
   --color-text-muted: #5A7080;
   --color-text-dim: #3A5060;
-  --font-sans: var(--font-syne);
+  --font-sans: var(--font-manrope);
+  --font-display: var(--font-syne);
   --font-mono: var(--font-space-mono);
 }
 
-@font-face {
-  font-family: 'Syne';
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&display=swap');
+html {
+  font-size: clamp(15px, 0.2vw + 14px, 17px);
 }
 
 body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.55;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), var(--font-sans), sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.container-page {
+  width: min(100%, 80rem);
+  margin-inline: auto;
 }
 
 /* Scanline animation */
@@ -79,9 +92,9 @@ div:has(> .dotsafe-connect-btn) {
   border: 2px solid rgba(232, 23, 93, 0.5);
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: clamp(0.875rem, 0.2vw + 0.8rem, 0.95rem);
   min-width: 180px;
-  padding: 12px 28px !important;
+  padding: 12px 30px !important;
   border-radius: 10px;
   position: relative;
   overflow: hidden;

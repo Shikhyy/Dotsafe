@@ -75,15 +75,15 @@ export default function PolicyPage() {
 
   return (
     <AppLayout>
-      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-6 py-3 border-b border-border bg-bg/80 backdrop-blur-md">
+      <header className="sticky top-0 z-30 flex items-center justify-between px-4 md:px-7 py-3.5 border-b border-border bg-bg/80 backdrop-blur-md">
         <div className="flex items-center gap-3">
           <FileCheck size={18} className="text-accent" />
-          <h2 className="text-sm font-semibold text-text">Approval Policies</h2>
+          <h2 className="text-base font-semibold text-text">Approval Policies</h2>
         </div>
         <WalletConnect />
       </header>
 
-      <div className="p-4 md:p-6 max-w-4xl">
+      <div className="p-4 md:p-7 max-w-6xl">
         {/* Info banner */}
         <div className="mb-6 p-4 bg-accent/5 border border-accent/20 rounded-xl">
           <div className="flex items-start gap-3">

@@ -1,0 +1,12 @@
+{
+  "network": "polkadotTestnet",
+  "chainId": "420420417",
+  "deployedAt": "2026-03-14T04:28:28.492Z",
+  "deployer": "0x94cC3d0eccb4d26bB5341BfdE319B28E92D5e85d",
+  "contracts": {
+    "ApprovalScanner": "0x723BE9931C1417Ef00B7f6f426e387Dc5099E602",
+    "BatchRevoker": "0xe136a28958DBd9Ad3A8c942B91e01064f95a1E8f",
+    "XCMGuard": "0x78e0C8c7a94122211E07b14562C5d781aDA748dC",
+    "ApprovalPolicy": "0x19eDb13a0FA86a89aC7fD14f811769230B3Bf00A"
+  }
+}
