@@ -41,57 +41,76 @@ export function useAIScoring() {
 
     setAppState('SCORING');
 
+    const uncachedApprovals = [];
+
+    // Check cache first
     for (const approval of scanResult.approvals) {
-      // Check cache first
       const cached = getCachedScore(approval.spenderAddress);
       if (cached) {
         updateApprovalScore(approval.id, cached);
-        continue;
+      } else {
+        uncachedApprovals.push(approval);
       }
+    }
 
-      let success = false;
-      let retries = 2; // Try up to 3 times
-      
-      while (!success && retries >= 0) {
-        try {
-          const res = await fetch('/api/score-contract', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contractAddress: approval.spenderAddress,
-              chainId: activeChain?.id ?? 420420421,
-              allowanceAmount: approval.allowanceRaw.toString(),
-              approvalAge: Math.floor((Date.now() / 1000) - approval.approvalTimestamp),
-              isUnlimited: approval.isUnlimited,
-              tokenSymbol: approval.tokenSymbol,
-            }),
-          });
+    if (uncachedApprovals.length === 0) {
+      setAppState('IDLE');
+      return;
+    }
 
-          if (res.status === 429 && retries > 0) {
-            // Hit Gemini RPM rate limit. Wait 4.5 seconds and retry.
-            await new Promise((r) => setTimeout(r, 4500));
-            retries--;
-            continue;
-          }
+    let success = false;
+    let retries = 2; // Try up to 3 times
+    
+    while (!success && retries >= 0) {
+      try {
+        const payload = {
+          chainId: activeChain?.id ?? 420420421,
+          approvals: uncachedApprovals.map(a => ({
+            id: a.id,
+            contractAddress: a.spenderAddress,
+            allowanceAmount: a.allowanceRaw.toString(),
+            approvalAge: Math.floor((Date.now() / 1000) - a.approvalTimestamp),
+            isUnlimited: a.isUnlimited,
+            tokenSymbol: a.tokenSymbol,
+          }))
+        };
 
-          if (!res.ok) throw new Error('Score API failed');
+        const res = await fetch('/api/score-batch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-          const score: AIRiskScore = await res.json();
-          updateApprovalScore(approval.id, score);
-          setCachedScore(approval.spenderAddress, score);
-          success = true;
-          
-          // Add a tiny 250ms delay between successful requests to prevent bursting the API
-          await new Promise((r) => setTimeout(r, 250));
-          
-        } catch {
-          if (retries > 0) {
-            retries--;
-            await new Promise((r) => setTimeout(r, 2000));
-            continue;
-          }
-          
-          // Score permanently unavailable — don't block UI
+        if (res.status === 429 && retries > 0) {
+          await new Promise((r) => setTimeout(r, 4500));
+          retries--;
+          continue;
+        }
+
+        if (!res.ok) throw new Error('Score API Batch failed');
+
+        const data = await res.json();
+        
+        for (const score of data.scores) {
+           updateApprovalScore(score.id, score);
+           
+           // Match approval spenderAddress to cache it properly
+           const matchingApproval = uncachedApprovals.find(a => a.id === score.id);
+           if (matchingApproval) {
+               setCachedScore(matchingApproval.spenderAddress, score);
+           }
+        }
+        
+        success = true;
+      } catch {
+        if (retries > 0) {
+          retries--;
+          await new Promise((r) => setTimeout(r, 2000));
+          continue;
+        }
+        
+        // Score permanently unavailable — don't block UI
+        for (const approval of uncachedApprovals) {
           updateApprovalScore(approval.id, {
             riskLevel: 'CAUTION',
             riskScore: 50,
@@ -107,8 +126,8 @@ export function useAIScoring() {
             aiModel: 'Gemini 2.0 Flash (Fallback)',
             scoredAt: Date.now(),
           });
-          success = true; // Break out of retry loop
         }
+        success = true;
       }
     }
 

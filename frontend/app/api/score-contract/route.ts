@@ -21,9 +21,10 @@ interface ScoreRequest {
 }
 
 export async function POST(request: NextRequest) {
+  let body: ScoreRequest | null = null;
   try {
-    const body: ScoreRequest = await request.json();
-    const { contractAddress, chainId, allowanceAmount, approvalAge, isUnlimited, tokenSymbol } = body;
+    body = await request.json();
+    const { contractAddress, chainId, allowanceAmount, approvalAge, isUnlimited, tokenSymbol } = body as ScoreRequest;
 
     if (!contractAddress || typeof contractAddress !== 'string') {
       return NextResponse.json({ error: 'contractAddress required' }, { status: 400 });
@@ -158,10 +159,16 @@ Be conservative and thorough. Every flag protects real user funds on Polkadot Hu
 
     return NextResponse.json(score);
   } catch (err: any) {
+    const tokenSymbol = body?.tokenSymbol || 'Unknown';
+    const isUnlimited = body?.isUnlimited || false;
+    const allowanceAmount = body?.allowanceAmount || '0';
+    const contractAddress = body?.contractAddress || '0x0000000000000000000000000000000000000000';
+    const approvalAge = body?.approvalAge || 0;
+
     const errorMsg = err?.message || String(err);
     if (errorMsg.includes('429')) {
       // Return 429 cleanly so the frontend's retry loop catches it and backs off
-      console.warn(`[RATE LIMIT] Gemini API limit reached. Frontend will retry.`);
+      console.warn(`[RATE LIMIT] Gemini API limit reached for ${tokenSymbol}. Frontend will retry.`);
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
     }
     
