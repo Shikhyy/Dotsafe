@@ -10,7 +10,7 @@ const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 function getCachedScore(contractAddress: string): AIRiskScore | null {
   if (typeof window === 'undefined') return null;
   try {
-    const raw = localStorage.getItem(`dotsafe_score_${contractAddress.toLowerCase()}`);
+    const raw = localStorage.getItem(`dotsafe_score_v2_${contractAddress.toLowerCase()}`);
     if (!raw) return null;
     const cached = JSON.parse(raw) as AIRiskScore;
     if (Date.now() - cached.scoredAt > CACHE_TTL) return null;
@@ -23,7 +23,7 @@ function getCachedScore(contractAddress: string): AIRiskScore | null {
 function setCachedScore(contractAddress: string, score: AIRiskScore) {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(`dotsafe_score_${contractAddress.toLowerCase()}`, JSON.stringify(score));
+    localStorage.setItem(`dotsafe_score_v2_${contractAddress.toLowerCase()}`, JSON.stringify(score));
   } catch {
     // localStorage full — ignore
   }

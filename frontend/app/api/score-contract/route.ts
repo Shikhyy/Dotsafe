@@ -89,11 +89,16 @@ Risk Reducers (-10 to -20):
 - Multisig admin setup: -15 points
 - Known institutional backing (Polkadot Foundation, parachains): -20 points
 
+SCORING RULES:
+1. Base score for ANY unverified/unknown contract is 30.
+2. If Is Unlimited is TRUE, automatically add +35 points.
+3. If Is Unlimited is TRUE AND the token is a stablecoin (USDC, USDT, DAI), the final score MUST BE >= 85 (DANGER).
+4. If it's a known institutional contract, final score MUST BE <= 20 (SAFE).
+
 Polkadot Hub Context:
 - Ecosystem is nascent — apply caution with new contracts
 - XCM introduces cross-chain vectors — flag if approval reaches multiple parachains
 - Native asset bridges (DOT, GLMR, ASTR) have bridge trust assumptions
-- Most contracts will be young — normalize for ecosystem age
 
 CONFIDENCE SCORING:
 - Confidence HIGH (90-100%): Contract has verifiable on-chain evidence of all claims
