@@ -6,7 +6,7 @@ import type { ApprovalData } from './types';
 const MAX_UINT256 = 2n ** 256n - 1n;
 const UNLIMITED_THRESHOLD = 2n ** 128n;
 
-const APPROVAL_TOPIC = '0x8c5be1e5ebec7d5bd14f714b5698a583299b7726e68f51610a89790d80e241dc'; // keccak256('Approval(address,address,uint256)')
+const APPROVAL_TOPIC = '0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925'; // keccak256('Approval(address,address,uint256)')
 const APPROVAL_FOR_ALL_TOPIC = '0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31'; // keccak256('ApprovalForAll(address,address,bool)')
 
 function padAddress(address: string): `0x${string}` {

@@ -5,7 +5,11 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? '');
 
 // Rate limiting: simple in-memory store (use Redis in production)
 const rateMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 5; // requests per second per wallet
+const RATE_LIMIT = 20; // requests per second per wallet
+
+// Cache to prevent hitting Gemini's 15 RPM free tier limit
+const scoreCache = new Map<string, { score: any; timestamp: number }>();
+const CACHE_TTL = 1000 * 60 * 60; // 1 hour cache
 
 interface ScoreRequest {
   contractAddress: string;
@@ -23,6 +27,14 @@ export async function POST(request: NextRequest) {
 
     if (!contractAddress || typeof contractAddress !== 'string') {
       return NextResponse.json({ error: 'contractAddress required' }, { status: 400 });
+    }
+
+    // Check cache first!
+    const cacheKey = `${contractAddress.toLowerCase()}_${isUnlimited}_${allowanceAmount}`;
+    const cached = scoreCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      console.log(`[CACHE HIT] Returning cached AI score for ${tokenSymbol}`);
+      return NextResponse.json(cached.score);
     }
 
     // Simple rate limiting by IP
@@ -136,9 +148,19 @@ Be conservative and thorough. Every flag protects real user funds on Polkadot Hu
       return NextResponse.json({ error: 'Invalid score structure' }, { status: 500 });
     }
 
+    // Save to cache
+    scoreCache.set(cacheKey, { score, timestamp: Date.now() });
+
     return NextResponse.json(score);
-  } catch (err) {
-    console.error('Score API error:', err);
+  } catch (err: any) {
+    const errorMsg = err?.message || String(err);
+    if (errorMsg.includes('429')) {
+      // Return 429 cleanly so the frontend's retry loop catches it and backs off
+      console.warn(`[RATE LIMIT] Gemini API limit reached. Frontend will retry.`);
+      return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 });
+    }
+    
+    console.error('Score API error:', errorMsg);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

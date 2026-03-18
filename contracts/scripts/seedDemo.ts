@@ -25,41 +25,41 @@ async function main() {
   console.log(`🌐 Network: ${(await ethers.provider.getNetwork()).name}`);
   console.log("");
 
-  // ── 1. Deploy mock tokens ─────────────────────────────────────────────────
+  // ── 1. Deploy mock tokens (sequential with explicit gasLimit) ─────────────
   console.log("📦 Deploying mock tokens...");
+  const GAS_LIMIT = 5_000_000;
   const MockERC20 = await ethers.getContractFactory("MockERC20");
 
-  const tokens = await Promise.all([
-    MockERC20.deploy("Tether USD",      "USDT"),
-    MockERC20.deploy("USD Coin",        "USDC"),
-    MockERC20.deploy("Dai Stablecoin",  "DAI"),
-    MockERC20.deploy("Wrapped DOT",     "wDOT"),
-    MockERC20.deploy("Astar Network",   "ASTR"),
-  ]);
-
-  await Promise.all(tokens.map((t) => t.waitForDeployment()));
-
-  const [USDT, USDC, DAI, wDOT, ASTR] = tokens;
-
+  const USDT = await MockERC20.deploy("Tether USD", "USDT", { gasLimit: GAS_LIMIT });
+  await USDT.waitForDeployment();
   console.log(`  ✅ USDT:  ${await USDT.getAddress()}`);
+
+  const USDC = await MockERC20.deploy("USD Coin", "USDC", { gasLimit: GAS_LIMIT });
+  await USDC.waitForDeployment();
   console.log(`  ✅ USDC:  ${await USDC.getAddress()}`);
+
+  const DAI = await MockERC20.deploy("Dai Stablecoin", "DAI", { gasLimit: GAS_LIMIT });
+  await DAI.waitForDeployment();
   console.log(`  ✅ DAI:   ${await DAI.getAddress()}`);
+
+  const wDOT = await MockERC20.deploy("Wrapped DOT", "wDOT", { gasLimit: GAS_LIMIT });
+  await wDOT.waitForDeployment();
   console.log(`  ✅ wDOT:  ${await wDOT.getAddress()}`);
+
+  const ASTR = await MockERC20.deploy("Astar Network", "ASTR", { gasLimit: GAS_LIMIT });
+  await ASTR.waitForDeployment();
   console.log(`  ✅ ASTR:  ${await ASTR.getAddress()}`);
   console.log("");
 
   // ── 2. Spender addresses (fake protocols) ─────────────────────────────────
-  // Mix of "verified" and "suspicious" addresses to trigger varied AI scores.
+  // Generate random valid EVM addresses for the spenders to ensure 100% compatibility
   const spenders = {
-    // Risky — unverified random spenders (will score DANGER)
-    unknownDex:      "0x1234567890123456789012345678901234567890",
-    suspiciousBridge:"0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
-    randomContractA: "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    // Moderate — semi-known protocols (will score CAUTION)
-    newExchange:     "0xBBBBbbbbBBBBbbbbBBBBbbbbBBBBbbbbBBBBbbbb",
-    unknownFarm:     "0xCCCcccccCCCCcccCCCCcccCCCCcccCCCCcccCCCC",
-    // Safe-looking — long-established (will score SAFE/CAUTION)
-    oldProtocol:     "0xdDdDddDdDdDdDdDdDDdDdDdDdDdDdDdDdDdDdD1",
+    unknownDex:      ethers.Wallet.createRandom().address,
+    suspiciousBridge:ethers.Wallet.createRandom().address,
+    randomContractA: ethers.Wallet.createRandom().address,
+    newExchange:     ethers.Wallet.createRandom().address,
+    unknownFarm:     ethers.Wallet.createRandom().address,
+    oldProtocol:     ethers.Wallet.createRandom().address,
   };
 
   const MAX_UINT256 = ethers.MaxUint256;
@@ -71,33 +71,26 @@ async function main() {
   console.log("📝 Granting approvals...");
   console.log("");
 
-  interface ApprovalEntry {
-    token: { symbol: () => Promise<string>; approve: (spender: string, amount: bigint) => Promise<unknown> };
-    spenderName: string;
-    spender: string;
-    amount: bigint;
-  }
-
-  const approvals: ApprovalEntry[] = [
+  const approvals = [
     // 🔴 DANGER scenarios
-    { token: USDT, spenderName: "Unknown DEX",       spender: spenders.unknownDex,       amount: MAX_UINT256 }, // Unlimited stablecoin — critical
-    { token: USDC, spenderName: "Suspicious Bridge", spender: spenders.suspiciousBridge, amount: MAX_UINT256 }, // Unlimited stablecoin — critical
-    { token: DAI,  spenderName: "Unknown DEX",       spender: spenders.unknownDex,       amount: LARGE       }, // Large stablecoin approval
+    { token: USDT, spenderName: "Unknown DEX",       spender: spenders.unknownDex,       amount: MAX_UINT256 },
+    { token: USDC, spenderName: "Suspicious Bridge", spender: spenders.suspiciousBridge, amount: MAX_UINT256 },
+    { token: DAI,  spenderName: "Unknown DEX",       spender: spenders.unknownDex,       amount: LARGE       },
 
     // 🟡 CAUTION scenarios
-    { token: wDOT, spenderName: "New Exchange",      spender: spenders.newExchange,      amount: MAX_UINT256 }, // Unlimited wrapped asset
-    { token: ASTR, spenderName: "Unknown Farm",      spender: spenders.unknownFarm,      amount: LARGE       }, // Large bridged asset
-    { token: USDT, spenderName: "Random Contract A", spender: spenders.randomContractA,  amount: MED         }, // Medium stablecoin approval
+    { token: wDOT, spenderName: "New Exchange",      spender: spenders.newExchange,      amount: MAX_UINT256 },
+    { token: ASTR, spenderName: "Unknown Farm",      spender: spenders.unknownFarm,      amount: LARGE       },
+    { token: USDT, spenderName: "Random Contract A", spender: spenders.randomContractA,  amount: MED         },
 
     // 🟢 SAFE scenarios
-    { token: wDOT, spenderName: "Old Protocol",      spender: spenders.oldProtocol,      amount: SMALL       }, // Small amount, longer-lived
-    { token: ASTR, spenderName: "Old Protocol",      spender: spenders.oldProtocol,      amount: SMALL       }, // Small amount
+    { token: wDOT, spenderName: "Old Protocol",      spender: spenders.oldProtocol,      amount: SMALL       },
+    { token: ASTR, spenderName: "Old Protocol",      spender: spenders.oldProtocol,      amount: SMALL       },
   ];
 
   for (const { token, spenderName, spender, amount } of approvals) {
     const symbol = await token.symbol();
     const label = amount === MAX_UINT256 ? "UNLIMITED" : ethers.formatUnits(amount, 18);
-    const tx = await (token.approve(spender, amount) as Promise<import("ethers").ContractTransactionResponse>);
+    const tx = await token.approve(spender, amount, { gasLimit: GAS_LIMIT });
     await tx.wait();
     console.log(`  ✅ ${symbol.padEnd(5)} → ${spenderName.padEnd(22)} [${label}]`);
   }
