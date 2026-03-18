@@ -22,10 +22,41 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "DotSafe — AI-Powered Wallet Risk Guard",
-  description: "Scan, score, and revoke risky token approvals on Passet Hub",
+  title: "DotSafe — AI-Powered Wallet Risk Guard for Polkadot Hub",
+  description:
+    "Scan all your token approvals, get AI-powered risk scores via Gemini 2.0 Flash, and revoke dangerous permissions in one transaction. Built for Passet Hub with XCM cross-chain monitoring.",
+  keywords: [
+    "Polkadot",
+    "Polkadot Hub",
+    "Passet Hub",
+    "Token Approvals",
+    "Wallet Security",
+    "AI Risk Scoring",
+    "Gemini AI",
+    "ERC-20",
+    "Batch Revoke",
+    "XCM",
+    "Smart Contract",
+    "DeFi Security",
+  ],
   icons: {
     icon: "/icon.svg",
+  },
+  openGraph: {
+    title: "DotSafe — AI-Powered Wallet Risk Guard",
+    description:
+      "Scan, score, and revoke risky token approvals on Polkadot Hub. Powered by Google Gemini 2.0 Flash AI.",
+    type: "website",
+    siteName: "DotSafe",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DotSafe — AI-Powered Wallet Risk Guard",
+    description:
+      "Scan, score, and revoke risky token approvals on Polkadot Hub. Powered by Gemini 2.0 Flash.",
+  },
+  other: {
+    "theme-color": "#E8175D",
   },
 };
 

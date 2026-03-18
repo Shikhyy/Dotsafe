@@ -13,8 +13,12 @@
 [![Polkadot](https://img.shields.io/badge/Passet_Hub-420420417-E6007A?logo=polkadot)](https://polkadot.com/)
 [![Gemini AI](https://img.shields.io/badge/Gemini-2.0_Flash-4285F4?logo=google)](https://ai.google.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/Tests-73%2F73_Passing-00E5A0)](contracts/test/)
+[![Hackathon](https://img.shields.io/badge/🏆_Track_1-AI_Powered_DApps-E6007A?style=flat)](https://dorahacks.io/hackathon/polkadot-solidity-hackathon)
 
 <br />
+
+<img src="https://img.shields.io/badge/🏆_Polkadot_Solidity_Hackathon_2026-Track_1:_AI_Powered-E6007A?style=for-the-badge" alt="Hackathon Track" />
 
 <img src="https://img.shields.io/badge/⚠️_Stop_Approvals_From_Draining_Your_Wallet-FF3B30?style=for-the-badge" alt="Stop Approvals" />
 
@@ -285,12 +289,12 @@ cd contracts
 npm run test
 ```
 
-Test coverage includes:
+**73/73 tests passing** ✅ — Test coverage includes:
 
-- **ApprovalScanner** — Allowance checks, batch operations, at-risk value calculations
-- **BatchRevoker** — Single/batch revocations, event emissions, input validation
-- **XCMGuard** — Parachain monitoring, cross-chain alerts, access control
-- **ApprovalPolicy** — Policy management, whitelist updates, registration flow
+- **ApprovalScanner** (7 tests) — Allowance checks, batch operations, at-risk value calculations
+- **BatchRevoker** (13 tests) — Single/batch revocations, event emissions, input validation
+- **XCMGuard** (32 tests) — Parachain monitoring, cross-chain alerts, access control
+- **ApprovalPolicy** (21 tests) — Policy management, whitelist updates, registration flow
 
 ---
 
@@ -372,6 +376,26 @@ Contributions are welcome! Please follow these steps:
 3. **Commit** your changes: `git commit -m 'feat: add my feature'`
 4. **Push** to the branch: `git push origin feature/my-feature`
 5. **Open** a Pull Request
+
+---
+
+## 🎬 Demo & Testing Guide
+
+See **[DEMO.md](DEMO.md)** for a step-by-step guide to test DotSafe, including:
+- Connecting a wallet on Passet Hub testnet
+- Scanning approvals and viewing AI risk scores
+- Batch revoking dangerous approvals
+- Managing approval policies
+- Exploring XCM cross-chain monitoring
+
+**Contract addresses on Passet Hub Testnet (420420417):**
+
+| Contract | Subscan Link |
+|----------|--------------|
+| ApprovalScanner | [0x723B...9602](https://assethub-paseo.subscan.io/account/0x723BE9931C1417Ef00B7f6f426e387Dc5099E602) |
+| BatchRevoker | [0xe136...8f](https://assethub-paseo.subscan.io/account/0xe136a28958DBd9Ad3A8c942B91e01064f95a1E8f) |
+| XCMGuard | [0x78e0...8dC](https://assethub-paseo.subscan.io/account/0x78e0C8c7a94122211E07b14562C5d781aDA748dC) |
+| ApprovalPolicy | [0x19eD...00A](https://assethub-paseo.subscan.io/account/0x19eDb13a0FA86a89aC7fD14f811769230B3Bf00A) |
 
 ---
 

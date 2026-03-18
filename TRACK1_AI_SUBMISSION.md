@@ -269,7 +269,7 @@ DotSafe is:
 ### ✅ OpenZeppelin Sponsor Track
 - **Uses OZ libraries** ✅ (AccessControl, Pausable, ReentrancyGuard, Ownable, EnumerableSet)
 - **Non-trivial usage** ✅ (Policy enforcement, batch operations, role-based access)
-- **Secure architecture** ✅ (All 59 tests passing)
+- **Secure architecture** ✅ (All 73/73 tests passing)
 - **Deployed or deployable** ✅ (Full deployment module ready)
 
 ---
@@ -340,7 +340,7 @@ Approvals reaching Moonbeam/Astar/Acala:
 
 **Smart Contracts**:
 - 4 contracts (ApprovalScanner, BatchRevoker, ApprovalPolicy, XCMGuard)
-- 59 tests, 100% pass rate
+- 73 tests, 100% pass rate
 - Deep OpenZeppelin integration
 - Ready for Polkadot Hub mainnet deployment
 
