@@ -8,7 +8,7 @@ import { AIReasoningCard } from './AIReasoningCard';
 import { truncateAddress, formatAllowance } from '@/lib/scanner';
 import { useDotSafeStore } from '@/store';
 import { useBatchRevoke } from '@/hooks/useBatchRevoke';
-import { ChevronDown, X, Plus } from 'lucide-react';
+import { ChevronDown, X, Plus, Shield } from 'lucide-react';
 
 function AnimatedScore({ value, className }: { value: number; className?: string }) {
   const [display, setDisplay] = useState(0);
@@ -212,6 +212,15 @@ export function ApprovalRow({ approval, index }: ApprovalRowProps) {
               >
                 Revoke This Approval
               </button>
+              <a
+                href="/policy"
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-accent text-white rounded-md
+                           hover:bg-accent/90 transition-all duration-200 cursor-pointer shadow-[0_0_10px_rgba(232,23,93,0.3)]"
+              >
+                <Shield size={12} />
+                Wrap in Policy
+              </a>
               {!isSelected && (
                 <button
                   onClick={(e) => {

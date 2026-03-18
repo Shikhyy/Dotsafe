@@ -154,5 +154,45 @@ export function useXCMGuard() {
     }
   }, [account?.address, addToast, chain, chains, contractReady, refresh, sendTransaction]);
 
-  return { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains, refresh };
+  const simulateThreat = useCallback(async (paraId: number) => {
+    if (!contractReady || !account?.address) {
+      addToast({ type: 'error', title: 'Wallet Required', message: 'Connect wallet to simulate a threat.' });
+      return;
+    }
+
+    try {
+      const contract = getContract({
+        client: thirdwebClient,
+        chain,
+        address: CONTRACT_ADDRESSES.xcmGuard,
+        abi: XCM_GUARD_ABI,
+      });
+
+      // Simulated suspicious attacker address
+      const suspiciousAddress = '0x1337000000000000000000000000000000001337';
+      const encodedXcmMsg = '0x'; // Empty bytes since we are simulating the precompile
+
+      const tx = prepareContractCall({
+        contract,
+        method: 'sendRiskAlert',
+        params: [paraId, suspiciousAddress, encodedXcmMsg],
+      });
+
+      await sendTransaction(tx);
+      addToast({
+        type: 'success',
+        title: 'XCM Alert Dispatched',
+        message: 'Live cross-chain alert sent to the Passet Hub.'
+      });
+      setTimeout(() => void refresh(), 4000);
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Simulation Failed',
+        message: err?.message || 'Transaction reverted.',
+      });
+    }
+  }, [account?.address, addToast, chain, contractReady, refresh, sendTransaction]);
+
+  return { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains, refresh, simulateThreat };
 }

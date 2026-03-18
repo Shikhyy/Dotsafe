@@ -15,6 +15,7 @@ interface BatchScoreRequest {
     approvalAge: number;
     isUnlimited: boolean;
     tokenSymbol: string;
+    isContract: boolean;
   }[];
 }
 
@@ -45,7 +46,8 @@ export async function POST(request: NextRequest) {
     const approvalsText = batch.map((a, i) => `
 [Approval ${i}]
 ID: ${a.id}
-Contract Address: ${a.contractAddress}
+Spender Address: ${a.contractAddress}
+Is Smart Contract: ${a.isContract}
 Token: ${a.tokenSymbol}
 Allowance Amount: ${a.allowanceAmount}
 Is Unlimited: ${a.isUnlimited}
@@ -60,12 +62,12 @@ ${approvalsText}
 
 ADVANCED RISK FACTOR ANALYSIS:
 Critical Risk Factors (+20 to +40):
-- Unverified source code on blockchain: +30 points
+- Spender is an EOA (Externally Owned Account) instead of a Contract: +80 points (CRITICAL SCAM VECTOR)
 - Unlimited allowance for stablecoins (USDT, USDC, DAI, aUSD): +40 points (CRITICAL)
 
 SCORING RULES (STRICT):
-1. Base score for ANY unverified/unknown contract is 30.
-2. If Is Unlimited is TRUE, automatically add +35 points.
+1. If "Is Smart Contract" is FALSE (meaning it's a standard user wallet EOA getting an allowance), the final score MUST BE >= 85 (DANGER). This is a known phishing/drainer vector.
+2. Base score for ANY unverified/unknown contract is 30.
 3. If Is Unlimited is TRUE AND the token is a stablecoin (USDC, USDT, DAI), the final score MUST BE >= 85 (DANGER).
 4. If it's a known institutional contract, final score MUST BE <= 20 (SAFE).
 

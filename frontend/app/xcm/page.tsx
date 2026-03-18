@@ -7,7 +7,7 @@ import { ChainCard } from '@/components/xcm/ChainCard';
 import { Shield, Globe, Loader2, Radar } from 'lucide-react';
 
 export default function XCMPage() {
-  const { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains } = useXCMGuard();
+  const { chains, scanning, loading, totalAlerts, contractReady, scanAllParachains, simulateThreat } = useXCMGuard();
 
   return (
     <AppLayout>
@@ -67,7 +67,7 @@ export default function XCMPage() {
         {/* Chain grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {chains.map((chain) => (
-            <ChainCard key={chain.paraId} chain={chain} />
+            <ChainCard key={chain.paraId} chain={chain} onSimulateThreat={simulateThreat} />
           ))}
         </div>
 

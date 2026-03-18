@@ -8,9 +8,10 @@ import { RiskBadge } from '@/components/scanner/RiskBadge';
 
 interface ChainCardProps {
   chain: ParachainStatus;
+  onSimulateThreat?: (paraId: number) => Promise<void> | void;
 }
 
-export function ChainCard({ chain }: ChainCardProps) {
+export function ChainCard({ chain, onSimulateThreat }: ChainCardProps) {
   const [expanded, setExpanded] = useState(false);
   const hasApprovals = (chain.approvals?.length ?? 0) > 0;
 
@@ -62,6 +63,15 @@ export function ChainCard({ chain }: ChainCardProps) {
                   Risky approvals detected — click to review
                 </div>
               </div>
+            )}
+            {onSimulateThreat && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onSimulateThreat(chain.paraId); }}
+                  className="w-full mt-3 py-2 bg-surface-2 hover:bg-surface-3 border border-border rounded-lg text-xs font-semibold text-text transition-colors flex items-center justify-center gap-2 group"
+                >
+                  <AlertTriangle size={14} className="text-yellow group-hover:text-red transition-colors" />
+                  Simulate Threat Alert
+                </button>
             )}
           </div>
         )}

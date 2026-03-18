@@ -41,6 +41,7 @@ export interface ApprovalData {
   approvalBlock: number;
   approvalTimestamp: number;
   lastUsedTimestamp?: number;
+  isContract: boolean;
   aiScore?: AIRiskScore;
 }
 

@@ -68,6 +68,7 @@ export async function fetchApprovalEvents(
       tokenType: 'ERC20',
       approvalBlock: Number(log.blockNumber ?? 0),
       approvalTimestamp: 0,
+      isContract: true,
     });
   }
 
@@ -90,13 +91,40 @@ export async function fetchApprovalEvents(
         tokenType: 'ERC721',
         approvalBlock: Number(log.blockNumber ?? 0),
         approvalTimestamp: 0,
+        isContract: true,
       });
     } else {
       approvalMap.delete(key);
     }
   }
 
-  return Array.from(approvalMap.values());
+  const approvals = Array.from(approvalMap.values());
+
+  // ENHANCEMENT: Deterministic EOA vs Contract detection to provide hard facts to the AI
+  const uniqueSpenders = Array.from(new Set(approvals.map(a => a.spenderAddress)));
+  const codeMap = new Map<string, boolean>();
+
+  await Promise.all(
+    uniqueSpenders.map(async (spender) => {
+      try {
+        // Raw RPC call because eth_getCode might not be directly exported
+        const code = await rpcClient({
+          method: "eth_getCode",
+          params: [spender, "latest"],
+        });
+        codeMap.set(spender, code !== '0x' && code !== '0x0');
+      } catch {
+        // Safe default: assume it's a contract to avoid false EOA flags
+        codeMap.set(spender, true); 
+      }
+    })
+  );
+
+  for (const approval of approvals) {
+    approval.isContract = codeMap.get(approval.spenderAddress) ?? true;
+  }
+
+  return approvals;
 }
 
 export async function verifyLiveAllowance(

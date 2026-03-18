@@ -72,6 +72,7 @@ export function useAIScoring() {
             approvalAge: Math.floor((Date.now() / 1000) - a.approvalTimestamp),
             isUnlimited: a.isUnlimited,
             tokenSymbol: a.tokenSymbol,
+            isContract: a.isContract,
           }))
         };
 
